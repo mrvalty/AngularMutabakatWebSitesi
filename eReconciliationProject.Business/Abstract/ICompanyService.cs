@@ -13,5 +13,8 @@ namespace eReconciliationProject.Business.Abstract
         //CRUD
         IResult Add(Company company);
         IDataResult<List<Company>> GetList();
+
+        IResult CompanyExists(Company company);
+        IResult UserCompanyAdd(int userId, int companyId);
     }
 }

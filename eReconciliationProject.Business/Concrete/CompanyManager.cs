@@ -29,19 +29,34 @@ namespace eReconciliationProject.Business.Concrete
 
         public IResult Add(Company company)
         {
-            if(company.Name.Length > 10)
+            if (company.Name.Length > 10)
             {
                 _companyRepository.Add(company);
                 return new SuccessResult(Messages.AddedCompany);
             }
             return new ErrorResult("Şirket adı en az 10 karakter olmalıdır");
-          
+
+        }
+
+        public IResult CompanyExists(Company company)
+        {
+            var result = _companyRepository.Get(x => x.Name == company.Name && x.TaxDepartment == company.TaxDepartment && x.TaxIdNumber == company.TaxIdNumber && x.IdentityNumber == company.IdentityNumber);
+            if (result != null)
+            {
+                return new ErrorResult(Messages.CompanyAlreadyExists);
+            }
+            return new SuccessResult();
         }
 
         public IDataResult<List<Company>> GetList()
         {
-           return new SuccessDataResult<List<Company>>(_companyRepository.GetList(),"Listeleme İşlemi Başarılı");
+            return new SuccessDataResult<List<Company>>(_companyRepository.GetList(), "Listeleme İşlemi Başarılı");
         }
-        
+
+        public IResult UserCompanyAdd(int userId, int companyId)
+        {
+            _companyRepository.UserCompanyAdd(userId, companyId);
+            return new SuccessResult();
+        }
     }
 }

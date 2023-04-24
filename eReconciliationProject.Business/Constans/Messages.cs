@@ -13,6 +13,9 @@ namespace eReconciliationProject.Business.Constans
         public static string PasswordError = "Şifra hatalı.";
         public static string SuccessfulLogin = "Giriş işlemi başarılı.";
         public static string UserRegistered = "Kullanıcı kayıt işlemi başarılı.";
-        public static string UserAlReadyExists = "Bu kullanıcı sistem kayıtlı.";
+        public static string UserAlReadyExists = "Bu kullanıcı daha önce sisteme kaydedilmiş.";
+        public static string CompanyAlreadyExists = "Bu şirket daha önce sisteme kaydedilmiş.";
+        public static string MailParameterUpdate = "Mail verileri başarıyla güncellendi.";
+        public static string MailSendSuccess = "Mail başarıyla gönderildi.";
     }
 }
