@@ -44,25 +44,21 @@ namespace eReconciliationProject.API.Controllers
         }
 
         [HttpPost("registerSecondAccount")]
-        public IActionResult RegisterSecondAccount(UserForRegister userForRegister,int companyId)
+        public IActionResult RegisterSecondAccount(UserForRegisterToSecondAccountDto userForRegisterToSecond)
         {
-            var userExists = _authService.UserExists(userForRegister.Email);
+            var userExists = _authService.UserExists(userForRegisterToSecond.Email);
             if (!userExists.Success)
             {
                 return BadRequest(userExists.Message);
 
             }
 
-            var registerResult = _authService.RegisterSecondAccount(userForRegister, userForRegister.Password);
-            var result = _authService.CreateAccessToken(registerResult.Data, companyId);
+            var registerResult = _authService.RegisterSecondAccount(userForRegisterToSecond, userForRegisterToSecond.Password, userForRegisterToSecond.CompanyId);
+            var result = _authService.CreateAccessToken(registerResult.Data, userForRegisterToSecond.CompanyId);
             if (result.Success)
             {
                 return Ok(result);
             }
-            //if (registerResult.Success)
-            //{
-            //    return Ok(registerResult);
-            //}
 
             return BadRequest(registerResult.Message);
         }
@@ -81,6 +77,36 @@ namespace eReconciliationProject.API.Controllers
             {
                 return Ok(result.Data);
             }
+            return BadRequest(result.Message);
+        }
+
+        [HttpGet("confirmuser")]
+
+        public IActionResult ConfirmUser(string value)
+        {
+            var user = _authService.GetByMailConfirmValue(value).Data;
+            user.MailConfirm = true;
+            user.MailConfirmDate = DateTime.Now;
+            var result = _authService.Update(user);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result.Message);    
+        }
+
+        [HttpGet("sendConfirmEmail")]
+
+        public IActionResult SendConfirmEmail(int id)
+        {
+            var user = _authService.GetById(id).Data;
+            var result= _authService.SendConfirmedEmail(user);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
             return BadRequest(result.Message);
         }
     }

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace eReconciliationProject.Business.Concrete
 {
@@ -23,14 +24,16 @@ namespace eReconciliationProject.Business.Concrete
         private readonly ICompanyService _companyService;
         private readonly IMailService _mailService;
         private readonly IMailParameterService _mailParameterService;
+        private readonly IMailTemplateService _mailTemplateService;
 
-        public AuthManager(IUserService userService, ITokenHelper tokenHelper, ICompanyService companyService, IMailService mailService, IMailParameterService mailParameterService)
+        public AuthManager(IUserService userService, ITokenHelper tokenHelper, ICompanyService companyService, IMailService mailService, IMailParameterService mailParameterService, IMailTemplateService mailTemplateService)
         {
             _userService = userService;
             _tokenHelper = tokenHelper;
             _companyService = companyService;
             _mailService = mailService;
             _mailParameterService = mailParameterService;
+            _mailTemplateService = mailTemplateService;
         }
 
         public IResult CompanyExists(Company company)
@@ -48,6 +51,16 @@ namespace eReconciliationProject.Business.Concrete
             var claims = _userService.GetClaims(user, companyId);
             var accessToken = _tokenHelper.CreateToken(user,claims,companyId);
             return new SuccessDataResult<AccessToken>(accessToken);
+        }
+
+        public IDataResult<User> GetById(int id)
+        {
+            return new SuccessDataResult<User>(_userService.GetById(id));
+        }
+
+        public IDataResult<User> GetByMailConfirmValue(string value)
+        {
+            return new SuccessDataResult<User>(_userService.GetByMailConfirmValue(value));
         }
 
         public IDataResult<User> Login(UserForLogin userForLogin)
@@ -99,21 +112,40 @@ namespace eReconciliationProject.Business.Concrete
                 PasswordHash=user.PasswordHash,
                 PasswordSalt=user.PasswordSalt
             };
+
+            SendConfirmEmail(user);
+            return new SuccessDataResult<UserCompanyDto>(userCompanyDto, Messages.UserRegistered);
+        }
+        void SendConfirmEmail(User user)
+        {
+            string subject = "Kullanıcı Kayıt Onay Maili";
+            string body = "Kullanıcınız sisteme kayıt oldu.Kaydı tamamlamak için lütfen aşağıdaki linke tıklayınız...";
+            string link = "https://localhost:7256/api/Auth/confirmuser?value=" + user.MailConfirmValue;
+            string linkDescription = "Kaydı Onaylamak için Tıklayın";
+
+            var mailTemplate = _mailTemplateService.GetByTemplateName("Kayıt", 4);
+            string templateBody = mailTemplate.Data.Value;
+            templateBody = templateBody.Replace("{{title}}", subject);
+            templateBody = templateBody.Replace("{{message}}", body);
+            templateBody = templateBody.Replace("{{link}}", link);
+            templateBody = templateBody.Replace("{{linkDescription}}", linkDescription);
+
+
             var mailparam = _mailParameterService.Get(4);
             SendMailDto sendMailDto = new SendMailDto()
             {
                 mailParameter = mailparam.Data,
                 tomail = user.Email,
-                subject = "Kullanıcı Onay Maili",
-                body = "Kullanıcınız sisteme kayıt oldu.Kaydı tamamlamak için lütfen aşağıdaki maile tıklayınız..."
+                subject = subject,
+                body = templateBody
             };
 
             _mailService.SendMail(sendMailDto);
 
-            return new SuccessDataResult<UserCompanyDto>(userCompanyDto, Messages.UserRegistered);
+            user.MailConfirmDate = DateTime.Now;
+            _userService.Update(user);
         }
-
-        public IDataResult<User> RegisterSecondAccount(UserForRegister userForRegister, string password)
+        public IDataResult<User> RegisterSecondAccount(UserForRegister userForRegister, string password,int companyId)
         {
             byte[] passwordHash, passwordSalt;
             HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
@@ -130,7 +162,17 @@ namespace eReconciliationProject.Business.Concrete
                 Name = userForRegister.Name,
             };
             _userService.Add(user);
+            _companyService.UserCompanyAdd(user.Id, companyId);
+
+            SendConfirmEmail(user);
+
             return new SuccessDataResult<User>(user, Messages.UserRegistered);
+        }
+
+        public IResult Update(User user)
+        {
+            _userService.Update(user);
+            return new SuccessResult(Messages.UserMailConfirmSuccess);
         }
 
         public IResult UserExists(string email)
@@ -140,6 +182,31 @@ namespace eReconciliationProject.Business.Concrete
                 return new ErrorResult(Messages.UserAlReadyExists);
             }
             return new SuccessResult();
+        }
+
+        public IResult SendConfirmedEmail(User user)
+        {
+            if(user.MailConfirm == true)
+            {
+                return new ErrorResult(Messages.MailAlreadyConfirm);
+            }
+
+            DateTime confirmMailDate = user.MailConfirmDate;
+            DateTime now = DateTime.Now;
+            if(confirmMailDate.ToShortDateString() == now.ToShortDateString())
+            {
+                if(confirmMailDate.Hour == now.Hour && confirmMailDate.AddMinutes(5).Minute <= now.Minute)
+                {
+                    SendConfirmEmail(user);
+                    return new SuccessResult(Messages.SendConfirmEmailSuccess);
+                }
+                else
+                {
+                    return new ErrorResult(Messages.MailConfirmTimeHasNotExpired);
+                }
+            }
+            SendConfirmEmail(user);
+            return new SuccessResult(Messages.SendConfirmEmailSuccess);
         }
     }
 }

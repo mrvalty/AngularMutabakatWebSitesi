@@ -23,14 +23,29 @@ namespace eReconciliationProject.Business.Concrete
             _userRepository.Add(user);
         }
 
+        public User GetById(int id)
+        {
+            return _userRepository.Get(x=>x.Id == id);
+        }
+
         public User GetByMail(string email)
         {
             return _userRepository.Get(x => x.Email == email);
         }
 
+        public User GetByMailConfirmValue(string value)
+        {
+            return _userRepository.Get(x=>x.MailConfirmValue == value);
+        }
+
         public List<OperationClaim> GetClaims(User user, int companyId)
         {
             return _userRepository.GetClaims(user,companyId);
+        }
+
+        public void Update(User user)
+        {
+            _userRepository.Update(user);
         }
     }
 }

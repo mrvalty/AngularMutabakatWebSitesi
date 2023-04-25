@@ -47,6 +47,9 @@ namespace eReconciliationProject.Business.Autofac
             builder.RegisterType<MailManager>().As<IMailService>();
             builder.RegisterType<MailRepo>().As<IMailRepository>();
 
+            builder.RegisterType<MailTemplateManager>().As<IMailTemplateService>();
+            builder.RegisterType<MailTemplateRepo>().As<IMailTemplateRepository>();
+
 
             builder.RegisterType<UserManager>().As<IUserService>();
             builder.RegisterType<UserRepo>().As<IUserRepository>();
