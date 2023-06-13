@@ -1,4 +1,6 @@
 ﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Business.ValidationRules.FluentValidation;
+using eReconciliationProject.Core.Aspects.Autofac.Validation;
 using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
 using System;
@@ -18,8 +20,11 @@ namespace eReconciliationProject.Business.Concrete
             _userRepository = userRepository;
         }
 
+
+        [ValidationAspect(typeof(UserValidator))]
         public void Add(User user)
         {
+
             _userRepository.Add(user);
         }
 

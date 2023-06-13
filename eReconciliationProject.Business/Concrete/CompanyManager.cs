@@ -1,5 +1,8 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Business.Constans;
+using eReconciliationProject.Business.ValidationRules.FluentValidation;
+using eReconciliationProject.Core.Aspects.Autofac.Validation;
+using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
@@ -27,15 +30,11 @@ namespace eReconciliationProject.Business.Concrete
         //Log
         //Validation (bunları kontrol et sonra işlemi yap)
 
+        [ValidationAspect(typeof(CompanyValidator))]
         public IResult Add(Company company)
         {
-            if (company.Name.Length > 10)
-            {
                 _companyRepository.Add(company);
                 return new SuccessResult(Messages.AddedCompany);
-            }
-            return new ErrorResult("Şirket adı en az 10 karakter olmalıdır");
-
         }
 
         public IResult CompanyExists(Company company)
@@ -46,6 +45,11 @@ namespace eReconciliationProject.Business.Concrete
                 return new ErrorResult(Messages.CompanyAlreadyExists);
             }
             return new SuccessResult();
+        }
+
+        public IDataResult<UserCompany> GetCompany(int userId)
+        {
+            return new SuccessDataResult<UserCompany>(_companyRepository.GetCompany(userId));
         }
 
         public IDataResult<List<Company>> GetList()

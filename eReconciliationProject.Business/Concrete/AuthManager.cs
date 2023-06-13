@@ -1,6 +1,8 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Business.Constans;
+using eReconciliationProject.Business.ValidationRules.FluentValidation;
 using eReconciliationProject.Core.Concrete;
+using eReconciliationProject.Core.CrossCuttingConcerns.Validation;
 using eReconciliationProject.Core.Utilities.Hashing;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
@@ -8,6 +10,7 @@ using eReconciliationProject.Core.Utilities.Security.JWT;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
 using eReconciliationProject.Entities.Dtos;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,6 +96,11 @@ namespace eReconciliationProject.Business.Concrete
                 PasswordSalt=passwordSalt,
                 Name=userForRegister.Name,
             };
+
+
+            //ValidationTool.Validate(new UserValidator(), user);
+            //ValidationTool.Validate(new CompanyValidator(), company);
+
             _userService.Add(user);
             _companyService.Add(company);
 
@@ -207,6 +215,11 @@ namespace eReconciliationProject.Business.Concrete
             }
             SendConfirmEmail(user);
             return new SuccessResult(Messages.SendConfirmEmailSuccess);
+        }
+
+        public IDataResult<UserCompany> GetCompany(int userId)
+        {
+            return new SuccessDataResult<UserCompany>(_companyService.GetCompany(userId).Data);
         }
     }
 }

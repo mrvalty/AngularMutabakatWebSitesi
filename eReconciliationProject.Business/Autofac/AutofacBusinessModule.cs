@@ -1,6 +1,9 @@
 ﻿using Autofac;
+using Autofac.Extras.DynamicProxy;
+using Castle.DynamicProxy;
 using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Business.Concrete;
+using eReconciliationProject.Core.Utilities.Interceptors;
 using eReconciliationProject.Core.Utilities.Security.JWT;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.DA.Repositories.Concrete;
@@ -59,8 +62,11 @@ namespace eReconciliationProject.Business.Autofac
             builder.RegisterType<JwtHelper>().As<ITokenHelper>();
 
 
-
-
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces().EnableInterfaceInterceptors(new ProxyGenerationOptions()
+            {
+                Selector = new AspectInterceptorSelector()
+            }).SingleInstance();
 
             base.Load(builder);
         }

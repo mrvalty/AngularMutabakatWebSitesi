@@ -71,13 +71,19 @@ namespace eReconciliationProject.API.Controllers
             {
                 return BadRequest(userToLogin.Message);
             }
-
-            var result = _authService.CreateAccessToken(userToLogin.Data, 0);
-            if (result.Success)
+            if(userToLogin.Data.IsActive)
             {
-                return Ok(result.Data);
+                var userCompany = _authService.GetCompany(userToLogin.Data.Id).Data;
+                var result = _authService.CreateAccessToken(userToLogin.Data, userCompany.CompanyId);
+                if (result.Success)
+                {
+                    return Ok(result.Data);
+                }
+                return BadRequest(result.Message);
             }
-            return BadRequest(result.Message);
+            return BadRequest("Kullanıcı pasif durumda.Aktif etmek için yöneticinizle irtibata geçin.");
+
+
         }
 
         [HttpGet("confirmuser")]

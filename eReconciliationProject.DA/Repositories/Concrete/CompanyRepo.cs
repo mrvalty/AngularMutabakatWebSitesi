@@ -5,6 +5,7 @@ using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,15 @@ namespace eReconciliationProject.DA.Repositories.Concrete
 {
     public class CompanyRepo : EfEntityRepositoryBase<Company, ProjectContext>, ICompanyRepository
     {
+        public UserCompany GetCompany(int userId)
+        {
+            using (var context = new ProjectContext())
+            {
+                var result = context.UserCompanies.Where(c => c.UserId == userId).FirstOrDefault();
+                return result;
+            }
+        }
+
         public void UserCompanyAdd(int userId, int companyId)
         {
             using (var context = new ProjectContext())
