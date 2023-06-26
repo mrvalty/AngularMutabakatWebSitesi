@@ -1,6 +1,7 @@
 ﻿using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Entities.Concrete;
+using eReconciliationProject.Entities.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,9 @@ namespace eReconciliationProject.Business.Abstract
     {
         //CRUD
         IResult Add(Company company);
+        IResult Update(Company company);
+        IDataResult<Company> GetById(int id);  
+        IResult AddCompanyAndUserCompany(CompanyDto companyDto);
         IDataResult<List<Company>> GetList();
         IDataResult<UserCompany> GetCompany(int userId);
         IResult CompanyExists(Company company);

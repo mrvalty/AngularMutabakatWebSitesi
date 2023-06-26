@@ -1,12 +1,14 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Business.ValidationRules.FluentValidation;
+using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Aspects.Autofac.Validation;
 using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
+using eReconciliationProject.Entities.Dtos;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
@@ -36,6 +38,15 @@ namespace eReconciliationProject.Business.Concrete
                 _companyRepository.Add(company);
                 return new SuccessResult(Messages.AddedCompany);
         }
+        [ValidationAspect(typeof(CompanyValidator))]
+        [TransactionScopeAspect]
+        public IResult AddCompanyAndUserCompany(CompanyDto companyDto)
+        {
+            _companyRepository.Add(companyDto.Company);
+            _companyRepository.UserCompanyAdd(companyDto.UserId, companyDto.Company.Id);
+            return new SuccessResult(Messages.AddedCompany);
+
+        }
 
         public IResult CompanyExists(Company company)
         {
@@ -55,6 +66,17 @@ namespace eReconciliationProject.Business.Concrete
         public IDataResult<List<Company>> GetList()
         {
             return new SuccessDataResult<List<Company>>(_companyRepository.GetList(), "Listeleme İşlemi Başarılı");
+        }
+
+        public IDataResult<Company> GetById(int id)
+        {
+            return new SuccessDataResult<Company>(_companyRepository.Get(x => x.Id == id));
+        }
+
+        public IResult Update(Company company)
+        {
+            _companyRepository.Update(company);
+            return new SuccessResult(Messages.UpdateCompany);
         }
 
         public IResult UserCompanyAdd(int userId, int companyId)

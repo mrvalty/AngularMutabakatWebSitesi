@@ -9,6 +9,7 @@ namespace eReconciliationProject.Business.Constans
     public class Messages
     {
         public static string AddedCompany = "Şirket kaydı işlemi başarıyla yapıldı.";
+        public static string UpdateCompany = "Şirket kaydı işlemi başarıyla güncellendi.";
         public static string UserNotFound = "Kullanıcı bulunamadı.";
 
         public static string PasswordError = "Şifra hatalı.";
@@ -31,5 +32,11 @@ namespace eReconciliationProject.Business.Constans
 
 
         public static string MailConfirmTimeHasNotExpired = "Mail onayını 5 dakikada bir gönderebilirsiniz.";
+
+
+        public static string AddedCurrencyAccount = "Cari Kaydı Başarıyla Eklendi.";
+        public static string UpdatedCurrencyAccount = "Cari Kaydı Başarıyla Güncellendi..";
+        public static string DeletedCurrencyAccount = "Cari Kaydı Başarıyla Silindi.";
+
     }
 }

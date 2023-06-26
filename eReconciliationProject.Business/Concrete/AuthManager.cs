@@ -1,6 +1,7 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Business.ValidationRules.FluentValidation;
+using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.CrossCuttingConcerns.Validation;
 using eReconciliationProject.Core.Utilities.Hashing;
@@ -80,6 +81,7 @@ namespace eReconciliationProject.Business.Concrete
             return new SuccessDataResult<User>(userToCkech, Messages.SuccessfulLogin);
         }
 
+        [TransactionScopeAspect] //işlemde hata varsa devam ettirmez sonlandırır
         public IDataResult<UserCompanyDto> Register(UserForRegister userForRegister, string password,Company company)
         {
             byte[] passwordHash, passwordSalt;
