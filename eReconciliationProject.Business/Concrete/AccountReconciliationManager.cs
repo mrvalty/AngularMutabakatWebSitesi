@@ -1,6 +1,7 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Core.Aspects.Autofac.Transaction;
+using eReconciliationProject.Core.Aspects.Caching;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
@@ -24,34 +25,35 @@ namespace eReconciliationProject.Business.Concrete
             _accountReconciliatonRepository = accountReconciliatonRepository;
             _currencyAccountService = currencyAccountService;
         }
-
+        [CacheRemoveAspect("IAccountReconciliationService.Get")]
         public IResult Add(AccountReconciliaton accountReconciliaton)
         {
             _accountReconciliatonRepository.Add(accountReconciliaton);
             return new SuccessResult(Messages.AddedAccountReconciliation);
         }
-
+        [CacheRemoveAspect("IAccountReconciliationService.Get")]
         public IResult Delete(AccountReconciliaton accountReconciliaton)
         {
             _accountReconciliatonRepository.Delete(accountReconciliaton);
             return new SuccessResult(Messages.DeletedAccountReconciliation);
         }
-
+        [CacheAspect(60)]
         public IDataResult<AccountReconciliaton> GetById(int id)
         {
             return new SuccessDataResult<AccountReconciliaton>(_accountReconciliatonRepository.Get(x => x.Id == id));
         }
-
+        [CacheAspect(60)]
         public IDataResult<List<AccountReconciliaton>> GetList(int companyId)
         {
             return new SuccessDataResult<List<AccountReconciliaton>>(_accountReconciliatonRepository.GetList(x => x.CompanyId == companyId));
         }
-
+        [CacheRemoveAspect("IAccountReconciliationService.Get")]
         public IResult Update(AccountReconciliaton accountReconciliaton)
         {
             _accountReconciliatonRepository.Update(accountReconciliaton);
             return new SuccessResult(Messages.UpdatedAccountReconciliation);
         }
+        [CacheRemoveAspect("IAccountReconciliationService.Get")]
         [TransactionScopeAspect]
         public IResult AddToExcel(string filePath, int companyId)
         {
@@ -88,6 +90,7 @@ namespace eReconciliationProject.Business.Concrete
                         }
                     }
                 }
+                File.Delete(filePath);
             }
 
             return new SuccessResult(Messages.AddedAccountReconciliation);

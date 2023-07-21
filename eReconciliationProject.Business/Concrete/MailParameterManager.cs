@@ -1,5 +1,6 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Business.Constans;
+using eReconciliationProject.Core.Aspects.Caching;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
@@ -20,6 +21,7 @@ namespace eReconciliationProject.Business.Concrete
         {
             _mailParameterRepository = mailParameterRepository;
         }
+        [CacheRemoveAspect("IMailParameterService.Get")]
 
         public IResult Update(MailParameter mailParameter)
         {
@@ -41,7 +43,7 @@ namespace eReconciliationProject.Business.Concrete
 
             return new SuccessResult(Messages.MailParameterUpdate);
         }
-
+        [CacheAspect(60)]
         public IDataResult<MailParameter> Get(int companyId)
         {
             return new SuccessDataResult<MailParameter>(_mailParameterRepository.Get(x=>x.CompanyId == companyId));

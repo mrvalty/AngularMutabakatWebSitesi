@@ -3,6 +3,7 @@ using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Business.ValidationRules.FluentValidation;
 using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Aspects.Autofac.Validation;
+using eReconciliationProject.Core.Aspects.Caching;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
@@ -25,6 +26,7 @@ namespace eReconciliationProject.Business.Concrete
         {
             _currencyAccountRepository = currencyAccountRepository;
         }
+        [CacheRemoveAspect("ICurrencyAccountService.Get")]
         [ValidationAspect(typeof(CurrencyAccountValidator))]
         public IResult Add(CurrencyAccount currencyAccount)
         {
@@ -32,29 +34,33 @@ namespace eReconciliationProject.Business.Concrete
             return new SuccessResult(Messages.AddedCurrencyAccount);
         }
 
-       
+        [CacheRemoveAspect("ICurrencyAccountService.Get")]
         public IResult Delete(CurrencyAccount currencyAccount)
         {
             _currencyAccountRepository.Delete(currencyAccount);
             return new SuccessResult(Messages.DeletedCurrencyAccount);
         }
-
+        [CacheAspect(60)]
         public IDataResult<CurrencyAccount> Get(int id)
         {
            return new SuccessDataResult<CurrencyAccount>(_currencyAccountRepository.Get(x=>x.Id == id));
         }
+        [CacheAspect(60)]
 
         public IDataResult<List<CurrencyAccount>> GetList(int companyId)
         {
             return new SuccessDataResult<List<CurrencyAccount>>(_currencyAccountRepository.GetList(x => x.CompanyId == companyId));
         }
 
+        [CacheRemoveAspect("ICurrencyAccountService.Get")]
         [ValidationAspect(typeof(CurrencyAccountValidator))]
         public IResult Update(CurrencyAccount currencyAccount)
         {
             _currencyAccountRepository.Update(currencyAccount);
             return new SuccessResult(Messages.UpdatedCurrencyAccount);
         }
+
+        [CacheRemoveAspect("ICurrencyAccountService.Get")]
         [ValidationAspect(typeof(CurrencyAccountValidator))]
         [TransactionScopeAspect]
         public IResult AddToExcel(string filePath,int companyId)
@@ -100,6 +106,7 @@ namespace eReconciliationProject.Business.Concrete
 
             return new SuccessResult(Messages.AddedCurrencyAccount);
         }
+        [CacheAspect(60)]
 
         public IDataResult<CurrencyAccount> GetByCode(string code, int companyId)
         {

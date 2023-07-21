@@ -1,6 +1,7 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Business.ValidationRules.FluentValidation;
 using eReconciliationProject.Core.Aspects.Autofac.Validation;
+using eReconciliationProject.Core.Aspects.Caching;
 using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
 using System;
@@ -20,7 +21,7 @@ namespace eReconciliationProject.Business.Concrete
             _userRepository = userRepository;
         }
 
-
+        [CacheRemoveAspect("IUserService.Get")]
         [ValidationAspect(typeof(UserValidator))]
         public void Add(User user)
         {
@@ -28,16 +29,19 @@ namespace eReconciliationProject.Business.Concrete
             _userRepository.Add(user);
         }
 
+        [CacheAspect(60)]
         public User GetById(int id)
         {
             return _userRepository.Get(x=>x.Id == id);
         }
 
+        [CacheAspect(60)]
         public User GetByMail(string email)
         {
             return _userRepository.Get(x => x.Email == email);
         }
 
+        [CacheAspect(60)]
         public User GetByMailConfirmValue(string value)
         {
             return _userRepository.Get(x=>x.MailConfirmValue == value);
@@ -48,6 +52,7 @@ namespace eReconciliationProject.Business.Concrete
             return _userRepository.GetClaims(user,companyId);
         }
 
+        [CacheRemoveAspect("IUserService.Get")]
         public void Update(User user)
         {
             _userRepository.Update(user);

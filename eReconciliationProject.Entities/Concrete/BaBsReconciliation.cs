@@ -14,6 +14,7 @@ namespace eReconciliationProject.Entities.Concrete
         public int CurrencyAccountId { get; set; }
         public string Type { get; set; }
         public int Mounth { get; set; }
+        public decimal Total { get; set; }
         public int Year { get; set; }
         public int Quantity { get; set; }
         public bool IsSendEmail { get; set; }

@@ -1,6 +1,12 @@
 ﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Business.Constans;
+using eReconciliationProject.Core.Aspects.Autofac.Transaction;
+using eReconciliationProject.Core.Aspects.Caching;
+using eReconciliationProject.Core.Utilities.Results.Abstract;
+using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
+using ExcelDataReader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +18,84 @@ namespace eReconciliationProject.Business.Concrete
     public class AccountReconciliationDetailManager : IAccountReconciliationDetailService
     {
         private readonly IAccountReconciliationDetailRepository _accountReconciliationDetailRepository;
+        private readonly ICurrencyAccountService _currencyAccountService;
 
-        public AccountReconciliationDetailManager(IAccountReconciliationDetailRepository accountReconciliationDetailRepository)
+
+        public AccountReconciliationDetailManager(IAccountReconciliationDetailRepository accountReconciliationDetailRepository, ICurrencyAccountService currencyAccountService)
         {
             _accountReconciliationDetailRepository = accountReconciliationDetailRepository;
+            _currencyAccountService = currencyAccountService;
+        }
+        [CacheRemoveAspect("IAccountReconciliationDetailService.Get")]
+        public IResult Add(AccountReconciliationDetail accountReconciliationDetail)
+        {
+            _accountReconciliationDetailRepository.Add(accountReconciliationDetail);
+            return new SuccessResult(Messages.AddedAccountReconciliationDetail);
+        }
+        [CacheRemoveAspect("IAccountReconciliationDetailService.Get")]
+
+        [TransactionScopeAspect]
+        public IResult AddToExcel(string filePath, int accountReconciliationId)
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    while (reader.Read())
+                    {
+                        string description = reader.GetString(1);
+
+                        if (description != "Açıklama" && description != null)
+                        {
+                            DateTime date = reader.GetDateTime(0);
+                            double currencyId = reader.GetDouble(2);
+                            double debit = reader.GetDouble(3);
+                            double credit = reader.GetDouble(4);
+
+                            AccountReconciliationDetail accountReconciliationDetail = new AccountReconciliationDetail()
+                            {
+                                AccountReconciliationId = accountReconciliationId,
+                                Description = description,
+                                Date = date,
+                                CurrencyDebit = Convert.ToDecimal(credit),
+                                CurrencyCredit = Convert.ToDecimal(debit),
+                                CurrencyId = Convert.ToInt32(currencyId),
+                            };
+
+                            _accountReconciliationDetailRepository.Add(accountReconciliationDetail);
+                        }
+                    }
+                }
+                File.Delete(filePath);
+            }
+
+            return new SuccessResult(Messages.AddedAccountReconciliation);
+        }
+        [CacheRemoveAspect("IAccountReconciliationDetailService.Get")]
+
+        public IResult Delete(AccountReconciliationDetail accountReconciliationDetail)
+        {
+            _accountReconciliationDetailRepository.Delete(accountReconciliationDetail);
+            return new SuccessResult(Messages.DeletedAccountReconciliationDetail);
+        }
+        [CacheAspect(60)]
+        public IDataResult<AccountReconciliationDetail> GetById(int id)
+        {
+            return new SuccessDataResult<AccountReconciliationDetail>(_accountReconciliationDetailRepository.Get(x => x.Id == id));
+        }
+        [CacheAspect(60)]
+
+        public IDataResult<List<AccountReconciliationDetail>> GetList(int accountReconciliationId)
+        {
+            return new SuccessDataResult<List<AccountReconciliationDetail>>(_accountReconciliationDetailRepository.GetList(x => x.AccountReconciliationId == accountReconciliationId));
+        }
+        [CacheRemoveAspect("IAccountReconciliationDetailService.Get")]
+
+        public IResult Update(AccountReconciliationDetail accountReconciliationDetail)
+        {
+            _accountReconciliationDetailRepository.Update(accountReconciliationDetail);
+            return new SuccessResult(Messages.UpdatedAccountReconciliationDetail);
         }
     }
 }

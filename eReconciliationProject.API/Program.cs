@@ -1,11 +1,14 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using eReconciliationProject.Business.Autofac;
+using eReconciliationProject.Core.DependencyRevolvers;
+using eReconciliationProject.Core.Utilities.Ioc;
 using eReconciliationProject.Core.Utilities.Security.Encryption;
 using eReconciliationProject.Core.Utilities.Security.JWT;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.IdentityModel.Tokens;
+using eReconciliationProject.Core.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -34,6 +37,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         IssuerSigningKey=SecurityKeyHelper.CreateSecurityKey(tokenOptions.Securitykey)
     };
 });
+
+builder.Services.AddDependencyResolvers(new ICoreModule[]{
+    new CoreModule()
+});
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

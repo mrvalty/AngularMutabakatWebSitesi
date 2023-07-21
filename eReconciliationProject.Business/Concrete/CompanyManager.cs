@@ -3,6 +3,7 @@ using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Business.ValidationRules.FluentValidation;
 using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Aspects.Autofac.Validation;
+using eReconciliationProject.Core.Aspects.Caching;
 using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
@@ -32,12 +33,15 @@ namespace eReconciliationProject.Business.Concrete
         //Log
         //Validation (bunları kontrol et sonra işlemi yap)
 
+        [CacheRemoveAspect("ICompanyService.Get")]
         [ValidationAspect(typeof(CompanyValidator))]
         public IResult Add(Company company)
         {
                 _companyRepository.Add(company);
                 return new SuccessResult(Messages.AddedCompany);
         }
+
+        [CacheRemoveAspect("ICompanyService.Get")]
         [ValidationAspect(typeof(CompanyValidator))]
         [TransactionScopeAspect]
         public IResult AddCompanyAndUserCompany(CompanyDto companyDto)
@@ -58,27 +62,32 @@ namespace eReconciliationProject.Business.Concrete
             return new SuccessResult();
         }
 
+        [CacheAspect(60)]
         public IDataResult<UserCompany> GetCompany(int userId)
         {
             return new SuccessDataResult<UserCompany>(_companyRepository.GetCompany(userId));
         }
 
+        [CacheAspect(60)]
         public IDataResult<List<Company>> GetList()
         {
             return new SuccessDataResult<List<Company>>(_companyRepository.GetList(), "Listeleme İşlemi Başarılı");
         }
 
+        [CacheAspect(60)]
         public IDataResult<Company> GetById(int id)
         {
             return new SuccessDataResult<Company>(_companyRepository.Get(x => x.Id == id));
         }
 
+        [CacheRemoveAspect("ICompanyService.Get")]
         public IResult Update(Company company)
         {
             _companyRepository.Update(company);
             return new SuccessResult(Messages.UpdateCompany);
         }
 
+        [CacheRemoveAspect("ICompanyService.Get")]
         public IResult UserCompanyAdd(int userId, int companyId)
         {
             _companyRepository.UserCompanyAdd(userId, companyId);

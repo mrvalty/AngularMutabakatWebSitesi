@@ -43,5 +43,19 @@ namespace eReconciliationProject.Business.Constans
         public static string UpdatedAccountReconciliation = "Cari Mutabakat Kaydı Başarıyla Güncellendi..";
         public static string DeletedAccountReconciliation = "Cari Mutabakat Kaydı Başarıyla Silindi.";
 
+
+        public static string AddedAccountReconciliationDetail = "Cari Mutabakat Detay Kaydı Başarıyla Eklendi.";
+        public static string UpdatedAccountReconciliationDetail = "Cari Mutabakat Detay Kaydı Başarıyla Güncellendi..";
+        public static string DeletedAccountReconciliationDetail = "Cari Mutabakat Detay Kaydı Başarıyla Silindi.";
+
+
+        public static string AddedBaBsReconciliation = "BaBs Kaydı Başarıyla Eklendi.";
+        public static string UpdatedBaBsReconciliation = "BaBs Kaydı Başarıyla Güncellendi..";
+        public static string DeletedBaBsReconciliation = "BaBs Kaydı Başarıyla Silindi.";
+
+        public static string AddedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Eklendi.";
+        public static string UpdatedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Güncellendi..";
+        public static string DeletedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Silindi.";
+
     }
 }
