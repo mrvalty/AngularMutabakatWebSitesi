@@ -1,9 +1,11 @@
 ﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Business.BusinessAspect;
 using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Business.ValidationRules.FluentValidation;
 using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Aspects.Autofac.Validation;
 using eReconciliationProject.Core.Aspects.Caching;
+using eReconciliationProject.Core.Aspects.Performance;
 using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
@@ -80,6 +82,8 @@ namespace eReconciliationProject.Business.Concrete
             return new SuccessDataResult<Company>(_companyRepository.Get(x => x.Id == id));
         }
 
+        [PerformanceAspect(3)]
+        [SecuredOperation("Company.Update,Admin")]
         [CacheRemoveAspect("ICompanyService.Get")]
         public IResult Update(Company company)
         {

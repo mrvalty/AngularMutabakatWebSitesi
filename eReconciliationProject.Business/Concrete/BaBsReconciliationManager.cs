@@ -1,7 +1,9 @@
 ﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Business.BusinessAspect;
 using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Aspects.Caching;
+using eReconciliationProject.Core.Aspects.Performance;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
@@ -26,36 +28,56 @@ namespace eReconciliationProject.Business.Concrete
             _baBsReconciliationRepository = baBsReconciliationRepository;
             _currencyAccountService = currencyAccountService;
         }
+
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliation.Add,Admin")]
         [CacheRemoveAspect("IBaBsReconciliationService.Get")]
         public IResult Add(BaBsReconciliation baBsReconciliation)
         {
             _baBsReconciliationRepository.Add(baBsReconciliation);
             return new SuccessResult(Messages.AddedBaBsReconciliation);
         }
+
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliation.Delete,Admin")]
         [CacheRemoveAspect("IBaBsReconciliationService.Get")]
         public IResult Delete(BaBsReconciliation baBsReconciliation)
         {
             _baBsReconciliationRepository.Delete(baBsReconciliation);
             return new SuccessResult(Messages.DeletedBaBsReconciliation);
         }
-        [CacheAspect(60)]
 
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliation.Get,Admin")]
+        [CacheAspect(60)]
         public IDataResult<BaBsReconciliation> GetById(int id)
         {
             return new SuccessDataResult<BaBsReconciliation>(_baBsReconciliationRepository.Get(x => x.Id == id));
         }
-        [CacheAspect(60)]
 
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliation.GetList,Admin")]
+        [CacheAspect(60)]
         public IDataResult<List<BaBsReconciliation>> GetList(int companyId)
         {
             return new SuccessDataResult<List<BaBsReconciliation>>(_baBsReconciliationRepository.GetList(x => x.CompanyId == companyId));
         }
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliation.Update,Admin")]
         [CacheRemoveAspect("IBaBsReconciliationService.Get")]
         public IResult Update(BaBsReconciliation baBsReconciliation)
         {
             _baBsReconciliationRepository.Update(baBsReconciliation);
             return new SuccessResult(Messages.UpdatedBaBsReconciliation);
         }
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliation.Add,Admin")]
         [CacheRemoveAspect("IBaBsReconciliationService.Get")]
         [TransactionScopeAspect]
         public IResult AddToExcel(string filePath, int companyId)

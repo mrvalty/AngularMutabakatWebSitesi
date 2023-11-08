@@ -1,7 +1,9 @@
 ﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Business.BusinessAspect;
 using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Aspects.Caching;
+using eReconciliationProject.Core.Aspects.Performance;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
@@ -23,16 +25,21 @@ namespace eReconciliationProject.Business.Concrete
         {
             _baBsReconciliationRepository = baBsReconciliationRepository;
         }
-        [CacheRemoveAspect("IBaBsReconciliationDetailService.Get")]
 
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliationDetail.Add,Admin")]
+        [CacheRemoveAspect("IBaBsReconciliationDetailService.Get")]
         public IResult Add(BaBsReconciliationDetail baBsReconciliationDetail)
         {
             _baBsReconciliationRepository.Add(baBsReconciliationDetail);
             return new SuccessResult(Messages.AddedBaBsReconciliationDetail);
         }
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliationDetail.Add,Admin")]
         [TransactionScopeAspect]
         [CacheRemoveAspect("IBaBsReconciliationDetailService.Get")]
-
         public IResult AddToExcel(string filePath, int baBsReconciliationId)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -68,26 +75,36 @@ namespace eReconciliationProject.Business.Concrete
 
             return new SuccessResult(Messages.AddedBaBsReconciliation);
         }
-        [CacheRemoveAspect("IBaBsReconciliationDetailService.Get")]
 
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliationDetail.Delete,Admin")]
+        [CacheRemoveAspect("IBaBsReconciliationDetailService.Get")]
         public IResult Delete(BaBsReconciliationDetail baBsReconciliationDetail)
         {
             _baBsReconciliationRepository.Delete(baBsReconciliationDetail);
             return new SuccessResult(Messages.DeletedBaBsReconciliationDetail);
         }
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliationDetail.Get,Admin")]
         [CacheAspect(60)]
         public IDataResult<BaBsReconciliationDetail> GetById(int id)
         {
             return new SuccessDataResult<BaBsReconciliationDetail>(_baBsReconciliationRepository.Get(x => x.Id == id));
         }
-        [CacheAspect(60)]
 
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliationDetail.GetList,Admin")]
+        [CacheAspect(60)]
         public IDataResult<List<BaBsReconciliationDetail>> GetList(int baBsReconciliationId)
         {
             return new SuccessDataResult<List<BaBsReconciliationDetail>>(_baBsReconciliationRepository.GetList(x => x.BaBsReconciliationId == baBsReconciliationId));
         }
-        [CacheRemoveAspect("IBaBsReconciliationDetailService.Get")]
 
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliationDetail.Update,Admin")]
+        [CacheRemoveAspect("IBaBsReconciliationDetailService.Get")]
         public IResult Update(BaBsReconciliationDetail baBsReconciliationDetail)
         {
             _baBsReconciliationRepository.Update(baBsReconciliationDetail);

@@ -1,7 +1,9 @@
 ﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Business.BusinessAspect;
 using eReconciliationProject.Business.ValidationRules.FluentValidation;
 using eReconciliationProject.Core.Aspects.Autofac.Validation;
 using eReconciliationProject.Core.Aspects.Caching;
+using eReconciliationProject.Core.Aspects.Performance;
 using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
 using System;
@@ -52,6 +54,9 @@ namespace eReconciliationProject.Business.Concrete
             return _userRepository.GetClaims(user,companyId);
         }
 
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("User.Update,Admin")]
         [CacheRemoveAspect("IUserService.Get")]
         public void Update(User user)
         {

@@ -1,6 +1,8 @@
 ﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Business.BusinessAspect;
 using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Core.Aspects.Caching;
+using eReconciliationProject.Core.Aspects.Performance;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
@@ -21,6 +23,9 @@ namespace eReconciliationProject.Business.Concrete
         {
             _mailParameterRepository = mailParameterRepository;
         }
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("MailParameter.Update,Admin")]
         [CacheRemoveAspect("IMailParameterService.Get")]
 
         public IResult Update(MailParameter mailParameter)
