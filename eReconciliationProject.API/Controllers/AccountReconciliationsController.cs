@@ -1,7 +1,9 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Entities.Concrete;
+using eReconciliationProject.Entities.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection.Emit;
 
 namespace eReconciliationProject.API.Controllers
 {
@@ -62,7 +64,7 @@ namespace eReconciliationProject.API.Controllers
         [HttpGet("getList")]
         public IActionResult GetList(int companyId)
         {
-            var result = _accountReconciliationService.GetList(companyId);
+            var result = _accountReconciliationService.GetListDto(companyId);
             if (result.Success)
             {
                 return Ok(result);
@@ -94,6 +96,28 @@ namespace eReconciliationProject.API.Controllers
             return BadRequest("Lütfen Dosya Seçiniz.");
 
 
+        }
+
+        [HttpPost("sendReconciliationMail")]
+        public IActionResult SendReconciliationMail(AccountReconciliationDto accountReconciliatonDto)
+        {
+            var result = _accountReconciliationService.SendReconciliationMail(accountReconciliatonDto);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
+        }
+
+        [HttpGet("getByCode")]
+        public IActionResult GetByCode(string code)
+        {
+            var result = _accountReconciliationService.GetByCode(code);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
         }
     }
 }

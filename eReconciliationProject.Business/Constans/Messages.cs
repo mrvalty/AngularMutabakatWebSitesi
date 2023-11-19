@@ -55,7 +55,16 @@ namespace eReconciliationProject.Business.Constans
 
         public static string AddedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Eklendi.";
         public static string UpdatedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Güncellendi..";
-        public static string DeletedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Silindi.";
+        public static string DeletedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Silindi."; 
+        
+                
+        public static string AddedOperationClaim = "Yetki Başarıyla Eklendi.";
+        public static string UpdatedOperationClaim = "Yetki Başarıyla Güncellendi..";
+        public static string DeletedOperationClaim = "Yetki Başarıyla Silindi.";
+
+        public static string AddedUserOperationClaim = "Kullanıcıya Yetki Başarıyla Eklendi.";
+        public static string UpdatedUserOperationClaim = "Kullanıcıya Yetki Başarıyla Güncellendi.."; 
+        public static string DeletedUserOperationClaim = "Kullanıcıya Yetki Başarıyla Silindi.";
 
     }
 }

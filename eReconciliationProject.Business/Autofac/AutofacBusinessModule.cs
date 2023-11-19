@@ -57,9 +57,14 @@ namespace eReconciliationProject.Business.Autofac
             builder.RegisterType<UserManager>().As<IUserService>();
             builder.RegisterType<UserRepo>().As<IUserRepository>();
 
+            builder.RegisterType<OperationClaimManager>().As<IOperationClaimService>();
+            builder.RegisterType<OperationClaimRepo>().As<IOperationClaimRepository>();
 
             builder.RegisterType<AuthManager>().As<IAuthService>();
             builder.RegisterType<JwtHelper>().As<ITokenHelper>();
+
+            builder.RegisterType<UserOperationClaimManager>().As<IUserOperationClaimService>();
+            builder.RegisterType<UserOperationClaimRepo>().As<IUserOperationClaimRepository>();
 
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();

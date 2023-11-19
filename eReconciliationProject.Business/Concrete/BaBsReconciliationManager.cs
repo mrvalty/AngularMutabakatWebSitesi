@@ -8,9 +8,11 @@ using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
+using eReconciliationProject.Entities.Dtos;
 using ExcelDataReader;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,12 +23,18 @@ namespace eReconciliationProject.Business.Concrete
     {
         private readonly IBaBsReconciliationRepository _baBsReconciliationRepository;
         private readonly ICurrencyAccountService _currencyAccountService;
+        private readonly IMailService _mailService;
+        private readonly IMailTemplateService _mailTemplateService;
+        private readonly IMailParameterService _mailParameterService;
 
 
-        public BaBsReconciliationManager(IBaBsReconciliationRepository baBsReconciliationRepository, ICurrencyAccountService currencyAccountService)
+        public BaBsReconciliationManager(IBaBsReconciliationRepository baBsReconciliationRepository, ICurrencyAccountService currencyAccountService, IMailService mailService, IMailTemplateService mailTemplateService, IMailParameterService mailParameterService)
         {
             _baBsReconciliationRepository = baBsReconciliationRepository;
             _currencyAccountService = currencyAccountService;
+            _mailService = mailService;
+            _mailTemplateService = mailTemplateService;
+            _mailParameterService = mailParameterService;
         }
 
 
@@ -35,6 +43,8 @@ namespace eReconciliationProject.Business.Concrete
         [CacheRemoveAspect("IBaBsReconciliationService.Get")]
         public IResult Add(BaBsReconciliation baBsReconciliation)
         {
+            string guid = Guid.NewGuid().ToString();
+            baBsReconciliation.Guid = guid;
             _baBsReconciliationRepository.Add(baBsReconciliation);
             return new SuccessResult(Messages.AddedBaBsReconciliation);
         }
@@ -100,6 +110,7 @@ namespace eReconciliationProject.Business.Concrete
                             double total = reader.GetDouble(5);
 
                             int currencyAccountId = _currencyAccountService.GetByCode(code, companyId).Data.Id;
+                            string guid = Guid.NewGuid().ToString();
                             BaBsReconciliation baBsReconciliation = new BaBsReconciliation()
                             {
                                 CompanyId = companyId,
@@ -108,7 +119,8 @@ namespace eReconciliationProject.Business.Concrete
                                 Mounth = Convert.ToInt16(mounth),
                                 Year = Convert.ToInt16(year),
                                 Quantity = Convert.ToInt16(quantity),
-                                Total = Convert.ToDecimal(quantity)
+                                Total = Convert.ToDecimal(quantity),
+                                Guid = guid
 
                             };
 
@@ -120,6 +132,57 @@ namespace eReconciliationProject.Business.Concrete
             }
 
             return new SuccessResult(Messages.AddedBaBsReconciliation);
+        }
+
+        public IDataResult<BaBsReconciliation> GetByCode(string code)
+        {
+            return new SuccessDataResult<BaBsReconciliation>(_baBsReconciliationRepository.Get(x => x.Guid == code));
+
+        }
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliation.SendMail,Admin")]
+        public IResult SendReconciliationMail(BaBsReconciliationDto babsReconciliatonDto)
+        {
+            string subject = "Mutabakat Maili";
+            string body = $"Gönderici Şirket  : {babsReconciliatonDto.CompanyName} <br/>" +
+                          $"Gönderici Vergi Dairesi : {babsReconciliatonDto.CompanyTaxDepartment} <br/>" +
+                          $"Gönderici Vergi Numarası : {babsReconciliatonDto.CompanyIdentityNumber} <br/> <hr>" +
+                          $"Alıcı Şirket : {babsReconciliatonDto.AccountName} <br/>" +
+                          $"Alıcı Vergi Dairesi : {babsReconciliatonDto.AccountTaxDepartment} <br/>" +
+                          $"Alıcı Vergi Numarası : {babsReconciliatonDto.AccountTaxIdNumber} - {babsReconciliatonDto.AccountIdentityNumber}  <br/> <hr>" +
+                          $"Ay / Yıl : {babsReconciliatonDto.Mounth} / {babsReconciliatonDto.Year} <br/>" +
+                          $"Adet : {babsReconciliatonDto.Quantity} <br/>" +
+                          $"Tutar : {babsReconciliatonDto.Total} {babsReconciliatonDto.CurrencyCode} <br/>";
+            string link = "https://localhost:7256/api/BaBsReconciliations/GetByCode?code=" + babsReconciliatonDto.Guid;
+            string linkDescription = "Mutabakatı Cevaplamak için Tıklayın";
+
+            var mailTemplate = _mailTemplateService.GetByTemplateName("Kayıt", 4);
+            string templateBody = mailTemplate.Data.Value;
+            templateBody = templateBody.Replace("{{title}}", subject);
+            templateBody = templateBody.Replace("{{message}}", body);
+            templateBody = templateBody.Replace("{{link}}", link);
+            templateBody = templateBody.Replace("{{linkDescription}}", linkDescription);
+
+
+            var mailparam = _mailParameterService.Get(4);
+            Entities.Dtos.SendMailDto sendMailDto = new Entities.Dtos.SendMailDto()
+            {
+                mailParameter = mailparam.Data,
+                tomail = babsReconciliatonDto.AccountEmail,
+                subject = subject,
+                body = templateBody
+            };
+            _mailService.SendMail(sendMailDto);
+
+            return new SuccessResult(Messages.MailSendSuccess);
+        }
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliation.GetList,Admin")]
+        [CacheAspect(60)]
+        public IDataResult<List<BaBsReconciliationDto>> GetListDto(int companyId)
+        {
+            return new SuccessDataResult<List<BaBsReconciliationDto>>(_baBsReconciliationRepository.GetAllDto(companyId));
         }
     }
 }

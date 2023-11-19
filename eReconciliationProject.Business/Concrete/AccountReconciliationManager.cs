@@ -4,13 +4,16 @@ using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Aspects.Caching;
 using eReconciliationProject.Core.Aspects.Performance;
+using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
+using eReconciliationProject.Entities.Dtos;
 using ExcelDataReader;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,11 +24,17 @@ namespace eReconciliationProject.Business.Concrete
     {
         private readonly IAccountReconciliatonRepository _accountReconciliatonRepository;
         private readonly ICurrencyAccountService _currencyAccountService;
+        private readonly IMailService _mailService;
+        private readonly IMailTemplateService _mailTemplateService;
+        private readonly IMailParameterService _mailParameterService;
 
-        public AccountReconciliationManager(IAccountReconciliatonRepository accountReconciliatonRepository, ICurrencyAccountService currencyAccountService)
+        public AccountReconciliationManager(IAccountReconciliatonRepository accountReconciliatonRepository, ICurrencyAccountService currencyAccountService, IMailService mailService, IMailTemplateService mailTemplateService, IMailParameterService mailParameterService)
         {
             _accountReconciliatonRepository = accountReconciliatonRepository;
             _currencyAccountService = currencyAccountService;
+            _mailService = mailService;
+            _mailTemplateService = mailTemplateService;
+            _mailParameterService = mailParameterService;
         }
 
         [PerformanceAspect(3)]
@@ -33,6 +42,8 @@ namespace eReconciliationProject.Business.Concrete
         [CacheRemoveAspect("IAccountReconciliationService.Get")]
         public IResult Add(AccountReconciliaton accountReconciliaton)
         {
+            string guid = Guid.NewGuid().ToString();
+            accountReconciliaton.Guid = guid;
             _accountReconciliatonRepository.Add(accountReconciliaton);
             return new SuccessResult(Messages.AddedAccountReconciliation);
         }
@@ -91,7 +102,7 @@ namespace eReconciliationProject.Business.Concrete
                     {
                         string code = reader.GetString(0);
 
-                        if (code != "Cari Kodu" && code !=null)
+                        if (code != "Cari Kodu" && code != null)
                         {
                             DateTime startingDate = reader.GetDateTime(1);
                             DateTime endingDate = reader.GetDateTime(2);
@@ -100,6 +111,7 @@ namespace eReconciliationProject.Business.Concrete
                             double credit = reader.GetDouble(5);
 
                             int currencyAccountId = _currencyAccountService.GetByCode(code, companyId).Data.Id;
+                            string guid = Guid.NewGuid().ToString();
                             AccountReconciliaton accountReconciliaton = new AccountReconciliaton()
                             {
                                 CompanyId = companyId,
@@ -108,7 +120,8 @@ namespace eReconciliationProject.Business.Concrete
                                 CurrencyCredit = Convert.ToDecimal(debit),
                                 CurrencyId = Convert.ToInt32(currencyId),
                                 StartingDate = startingDate,
-                                EndingDate = endingDate
+                                EndingDate = endingDate,
+                                Guid=guid
                             };
 
                             _accountReconciliatonRepository.Add(accountReconciliaton);
@@ -120,5 +133,57 @@ namespace eReconciliationProject.Business.Concrete
 
             return new SuccessResult(Messages.AddedAccountReconciliation);
         }
+
+        [PerformanceAspect(3)]
+        public IDataResult<AccountReconciliaton> GetByCode(string code)
+        {
+            return new SuccessDataResult<AccountReconciliaton>(_accountReconciliatonRepository.Get(x => x.Guid == code));
+        }
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("AccountReconciliation.SendMail,Admin")]
+        public IResult SendReconciliationMail(AccountReconciliationDto accountReconciliatonDto)
+        {
+            string subject = "Mutabakat Maili";
+            string body = $"Gönderici Şirket  : {accountReconciliatonDto.CompanyName} <br/>" +
+                          $"Gönderici Vergi Dairesi : {accountReconciliatonDto.CompanyTaxDepartment} <br/>" +
+                          $"Gönderici Vergi Numarası : {accountReconciliatonDto.CompanyIdentityNumber} <br/> <hr>" +
+                          $"Alıcı Şirket : {accountReconciliatonDto.AccountName} <br/>" +
+                          $"Alıcı Vergi Dairesi : {accountReconciliatonDto.AccountTaxDepartment} <br/>" +
+                          $"Alıcı Vergi Numarası : {accountReconciliatonDto.AccountTaxIdNumber} - {accountReconciliatonDto.AccountIdentityNumber}  <br/> <hr>" +
+                          $"Borç : {accountReconciliatonDto.CurrencyDebit} {accountReconciliatonDto.CurrencyCode} <br/>" +
+                          $"Alacak : {accountReconciliatonDto.CurrencyCredit} {accountReconciliatonDto.CurrencyCode} <br/>";
+            string link = "https://localhost:7256/api/AccountReconciliations/GetByCode?code=" + accountReconciliatonDto.Guid;
+            string linkDescription = "Mutabakatı Cevaplamak için Tıklayın";
+
+            var mailTemplate = _mailTemplateService.GetByTemplateName("Kayıt", 4);
+            string templateBody = mailTemplate.Data.Value;
+            templateBody = templateBody.Replace("{{title}}", subject);
+            templateBody = templateBody.Replace("{{message}}", body);
+            templateBody = templateBody.Replace("{{link}}", link);
+            templateBody = templateBody.Replace("{{linkDescription}}", linkDescription);
+
+
+            var mailparam = _mailParameterService.Get(4);
+            Entities.Dtos.SendMailDto sendMailDto = new Entities.Dtos.SendMailDto()
+            {
+                mailParameter = mailparam.Data,
+                tomail = accountReconciliatonDto.AccountEmail,
+                subject = subject,
+                body = templateBody
+            };
+            _mailService.SendMail(sendMailDto);
+
+            return new SuccessResult(Messages.MailSendSuccess);
+        }
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("AccountReconciliation.GetList,Admin")]
+        [CacheAspect(60)]
+        public IDataResult<List<Entities.Dtos.AccountReconciliationDto>> GetListDto(int companyId)
+        {
+            return new SuccessDataResult<List<AccountReconciliationDto>>(_accountReconciliatonRepository.GetAllDto(companyId));
+        }
+
     }
 }

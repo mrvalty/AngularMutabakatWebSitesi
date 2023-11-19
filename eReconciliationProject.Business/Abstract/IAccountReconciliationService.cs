@@ -1,5 +1,6 @@
 ﻿using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Entities.Concrete;
+using eReconciliationProject.Entities.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,9 @@ namespace eReconciliationProject.Business.Abstract
         IResult Update(AccountReconciliaton accountReconciliaton);
         IResult Delete(AccountReconciliaton accountReconciliaton);
         IDataResult<AccountReconciliaton> GetById(int id);
+        IDataResult<AccountReconciliaton> GetByCode(string code);
         IDataResult<List<AccountReconciliaton>> GetList(int companyId);
+        IDataResult<List<AccountReconciliationDto>> GetListDto(int companyId);
+        IResult SendReconciliationMail(AccountReconciliationDto accountReconciliatonDto);
     }
 }
