@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.IdentityModel.Tokens;
 using eReconciliationProject.Core.Extensions;
 
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
@@ -21,7 +22,15 @@ IConfiguration configuration = builder.Configuration;
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("https://localhost:7256"));
+    options.AddPolicy("AllowOrigin",
+        builder =>
+        {
+            builder.WithOrigins("https://localhost:7256")
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+
+        });
 });
 var tokenOptions = configuration.GetSection("TokenOptions").Get<TokenOptions>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -31,10 +40,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = false,
-        ValidIssuer=tokenOptions.Issuer,
-        ValidAudience=tokenOptions.Audience,
-        ValidateIssuerSigningKey=true,
-        IssuerSigningKey=SecurityKeyHelper.CreateSecurityKey(tokenOptions.Securitykey)
+        ValidIssuer = tokenOptions.Issuer,
+        ValidAudience = tokenOptions.Audience,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = SecurityKeyHelper.CreateSecurityKey(tokenOptions.Securitykey)
     };
 });
 
@@ -55,14 +64,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors(builder=>builder.WithOrigins("https://localhost:7256").AllowAnyHeader());
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication();
-
+app.UseCors("AllowOrigin");
 app.UseAuthorization();
-
+app.UseAuthentication();
 app.MapControllers();
 
 app.Run();
