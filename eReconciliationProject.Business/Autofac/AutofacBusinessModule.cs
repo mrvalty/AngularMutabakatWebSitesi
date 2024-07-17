@@ -66,6 +66,8 @@ namespace eReconciliationProject.Business.Autofac
             builder.RegisterType<UserOperationClaimManager>().As<IUserOperationClaimService>();
             builder.RegisterType<UserOperationClaimRepo>().As<IUserOperationClaimRepository>();
 
+            builder.RegisterType<TermsandCoditionManager>().As<ITermsandConditionService>();
+            builder.RegisterType<TermsandConditionRepo>().As<ITermsandConditionsRepository>();
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces().EnableInterfaceInterceptors(new ProxyGenerationOptions()

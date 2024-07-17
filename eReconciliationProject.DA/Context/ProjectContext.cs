@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace eReconciliationProject.DA.Context
 {
-    public class ProjectContext :DbContext
+    public class ProjectContext : DbContext
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -31,6 +31,7 @@ namespace eReconciliationProject.DA.Context
         public DbSet<UserCompany> UserCompanies { get; set; }
         public DbSet<UserOperationClaim> UserOperationClaims { get; set; }
         public DbSet<MailTemplate> MailTemplates { get; set; }
+        public DbSet<TermsandCondition> TermsandConditions { get; set; }
 
     }
 }

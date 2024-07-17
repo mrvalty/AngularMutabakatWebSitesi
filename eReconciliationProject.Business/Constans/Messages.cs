@@ -66,5 +66,10 @@ namespace eReconciliationProject.Business.Constans
         public static string UpdatedUserOperationClaim = "Kullanıcıya Yetki Başarıyla Güncellendi.."; 
         public static string DeletedUserOperationClaim = "Kullanıcıya Yetki Başarıyla Silindi.";
 
+
+        public static string UpdateTermsandConditions = "Sözleşme Başarıyla Güncellendi.";
+
+
+
     }
 }
