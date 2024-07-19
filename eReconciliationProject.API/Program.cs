@@ -32,6 +32,7 @@ builder.Services.AddCors(options =>
 
         });
 });
+builder.Services.AddMemoryCache();
 var tokenOptions = configuration.GetSection("TokenOptions").Get<TokenOptions>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {

@@ -20,7 +20,8 @@ namespace eReconciliationProject.Core.CrossCuttingConcerns.Caching.Microsoft
 
         public void Add(string key, object value, int duration)
         {
-            _memoryCache.Set(key, value, TimeSpan.FromMinutes(duration));        }
+            _memoryCache.Set(key, value, TimeSpan.FromMinutes(duration));        
+        }
 
         public T Get<T>(string key)
         {
@@ -44,7 +45,9 @@ namespace eReconciliationProject.Core.CrossCuttingConcerns.Caching.Microsoft
 
         public void RemoveByPattern(string pattern)
         {
-            var cacheExtriesCollectionDefinition = typeof(MemoryCacheManager).GetProperty("EntriesCollection",System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+
+            var cacheExtriesCollectionDefinition = typeof(MemoryCache).GetProperty("EntriesCollection",System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             var cacheEntriesCollection = cacheExtriesCollectionDefinition.GetValue(_memoryCache) as dynamic;
 
