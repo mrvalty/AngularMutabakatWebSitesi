@@ -223,5 +223,10 @@ namespace eReconciliationProject.Business.Concrete
         {
             return new SuccessDataResult<UserCompany>(_companyService.GetCompany(userId).Data);
         }
+
+        public IDataResult<User> GetByEmail(string email)
+        {
+            return new SuccessDataResult<User>(_userService.GetByMail(email));
+        }
     }
 }

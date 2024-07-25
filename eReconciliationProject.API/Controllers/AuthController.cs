@@ -104,9 +104,18 @@ namespace eReconciliationProject.API.Controllers
 
         [HttpGet("sendConfirmEmail")]
 
-        public IActionResult SendConfirmEmail(int id)
+        public IActionResult SendConfirmEmail(string email)
         {
-            var user = _authService.GetById(id).Data;
+            var user = _authService.GetByEmail(email).Data;
+            if (user == null)
+            {
+                return BadRequest("Kullanıcı sistemde mevcut değil.");
+            }
+            if(user.MailConfirm)
+            {
+                return BadRequest("Kullanıcı daha önce maili onaylamış.");
+            }
+
             var result= _authService.SendConfirmedEmail(user);
             if (result.Success)
             {

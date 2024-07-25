@@ -18,6 +18,7 @@ namespace eReconciliationProject.Business.Abstract
         IDataResult<User> Login(UserForLogin userForLogin);
         IDataResult<User> GetByMailConfirmValue(string value);
         IDataResult<User> GetById(int id);
+        IDataResult<User> GetByEmail(string email);
         IResult UserExists(string email);
         IResult SendConfirmedEmail(User user);
         IResult Update(User user);
