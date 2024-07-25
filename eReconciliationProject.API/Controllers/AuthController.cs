@@ -91,6 +91,10 @@ namespace eReconciliationProject.API.Controllers
         public IActionResult ConfirmUser(string value)
         {
             var user = _authService.GetByMailConfirmValue(value).Data;
+            if (user.MailConfirm)
+            {
+                return BadRequest("Kullanıcı maili daha önceden onaylanmıştır.");
+            }
             user.MailConfirm = true;
             user.MailConfirmDate = DateTime.Now;
             var result = _authService.Update(user);
