@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace eReconciliationProject.Entities.Dtos
 {
-    public class UserForLogin :IDto
+    public class UserForgotPasswordDto : IDto
     {
-        public string email { get; set; }
-        public string password { get; set; }
+        public string Value { get; set; }
+        public string Password { get; set; }
     }
 }

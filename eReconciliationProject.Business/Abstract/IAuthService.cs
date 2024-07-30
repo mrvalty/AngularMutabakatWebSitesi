@@ -25,5 +25,9 @@ namespace eReconciliationProject.Business.Abstract
         IResult CompanyExists(Company company);
         IDataResult<AccessToken> CreateAccessToken(User user, int companyId);
         IDataResult<UserCompany> GetCompany(int userId);
+
+        IResult SendForgotPasswordEmail(User user, string value);
+        IResult ChangePassword(User user);
+
     }
 }

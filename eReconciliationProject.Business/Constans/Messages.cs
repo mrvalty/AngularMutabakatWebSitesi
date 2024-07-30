@@ -11,6 +11,7 @@ namespace eReconciliationProject.Business.Constans
         public static string AddedCompany = "Şirket kaydı işlemi başarıyla yapıldı.";
         public static string UpdateCompany = "Şirket kaydı işlemi başarıyla güncellendi.";
         public static string UserNotFound = "Kullanıcı bulunamadı.";
+        public static string UpdateUser = "Kullanıcı bilgileri başarıyla güncellendi.";
 
         public static string PasswordError = "Şifra hatalı.";
         public static string SuccessfulLogin = "Giriş işlemi başarılı.";
@@ -69,6 +70,8 @@ namespace eReconciliationProject.Business.Constans
 
         public static string UpdateTermsandConditions = "Sözleşme Başarıyla Güncellendi.";
 
+
+        public static string ChangePasswordSuccess = "Şifre değiştirme işlemi başarıyla gerçekleşti";
 
 
     }

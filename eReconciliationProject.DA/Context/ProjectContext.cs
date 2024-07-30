@@ -32,6 +32,7 @@ namespace eReconciliationProject.DA.Context
         public DbSet<UserOperationClaim> UserOperationClaims { get; set; }
         public DbSet<MailTemplate> MailTemplates { get; set; }
         public DbSet<TermsandCondition> TermsandConditions { get; set; }
+        public DbSet<UserForgotPassword>  UserForgotPasswords { get; set; }
 
     }
 }

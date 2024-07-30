@@ -12,12 +12,14 @@ using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
 using eReconciliationProject.Entities.Dtos;
 using FluentValidation;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using static System.Net.WebRequestMethods;
 
 namespace eReconciliationProject.Business.Concrete
 {
@@ -69,12 +71,12 @@ namespace eReconciliationProject.Business.Concrete
 
         public IDataResult<User> Login(UserForLogin userForLogin)
         {
-            var userToCkech = _userService.GetByMail(userForLogin.Email);
+            var userToCkech = _userService.GetByMail(userForLogin.email);
             if (userToCkech == null)
             {
                 return new ErrorDataResult<User>(Messages.UserNotFound);
             }
-            if (!HashingHelper.VerifyPasswordHash(userForLogin.Password, userToCkech.PasswordHash, userToCkech.PasswordSalt))
+            if (!HashingHelper.VerifyPasswordHash(userForLogin.password, userToCkech.PasswordHash, userToCkech.PasswordSalt))
             {
                 return new ErrorDataResult<User>(Messages.PasswordError);
             }
@@ -130,7 +132,7 @@ namespace eReconciliationProject.Business.Concrete
         {
             string subject = "Kullanıcı Kayıt Onay Maili";
             string body = "Kullanıcınız sisteme kayıt oldu.Kaydı tamamlamak için lütfen aşağıdaki linke tıklayınız...";
-            string link = "https://localhost:7256/api/Auth/confirmuser?value=" + user.MailConfirmValue;
+            string link = "http://localhost:4200/registerConfirm/" + user.MailConfirmValue;
             string linkDescription = "Kaydı Onaylamak için Tıklayın";
 
             var mailTemplate = _mailTemplateService.GetByTemplateName("Kayıt", 4);
@@ -182,7 +184,7 @@ namespace eReconciliationProject.Business.Concrete
         public IResult Update(User user)
         {
             _userService.Update(user);
-            return new SuccessResult(Messages.UserMailConfirmSuccess);
+            return new SuccessResult(Messages.UpdateUser);
         }
 
         public IResult UserExists(string email)
@@ -227,6 +229,44 @@ namespace eReconciliationProject.Business.Concrete
         public IDataResult<User> GetByEmail(string email)
         {
             return new SuccessDataResult<User>(_userService.GetByMail(email));
+        }
+
+        public IResult SendForgotPasswordEmail(User user, string value)
+        {
+            string subject = "Şifremi Unuttum";
+            string body = "Şifremi unuttum işlemi için aşağıdaki linkten şifrenizi yeniden oluşturabilirsiniz.Linkin geçerlilik süresi 1 saattir.";
+            string link = "http://localhost:4200/forgot-password/" + value;
+            string linkDescription = "Şifre Belirlemek İçin Tıklayın";
+
+            var mailTemplate = _mailTemplateService.GetByTemplateName("Kayıt", 4);
+            string templateBody = mailTemplate.Data.Value;
+            templateBody = templateBody.Replace("{{title}}", subject);
+            templateBody = templateBody.Replace("{{message}}", body);
+            templateBody = templateBody.Replace("{{link}}", link);
+            templateBody = templateBody.Replace("{{linkDescription}}", linkDescription);
+
+
+            var mailparam = _mailParameterService.Get(4);
+            SendMailDto sendMailDto = new SendMailDto()
+            {
+                mailParameter = mailparam.Data,
+                tomail = user.Email,
+                subject = subject,
+                body = templateBody
+            };
+
+            _mailService.SendMail(sendMailDto);
+
+            user.MailConfirmDate = DateTime.Now;
+            _userService.Update(user);
+
+            return new SuccessResult(Messages.MailSendSuccess);
+        }
+
+        public IResult ChangePassword(User user)
+        {
+            _userService.Update(user);
+            return new SuccessResult(Messages.ChangePasswordSuccess);
         }
     }
 }

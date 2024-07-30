@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace eReconciliationProject.Business.Autofac
 {
-    public class AutofacBusinessModule :Module
+    public class AutofacBusinessModule : Module
     {
         protected override void Load(ContainerBuilder builder)
         {
@@ -67,7 +67,10 @@ namespace eReconciliationProject.Business.Autofac
             builder.RegisterType<UserOperationClaimRepo>().As<IUserOperationClaimRepository>();
 
             builder.RegisterType<TermsandCoditionManager>().As<ITermsandConditionService>();
-            builder.RegisterType<TermsandConditionRepo>().As<ITermsandConditionsRepository>();
+            builder.RegisterType<TermsandConditionRepo>().As<ITermsandConditionsRepository>(); 
+            
+            builder.RegisterType<UserForgotPasswordManager>().As<IUserForgotPasswordService>();
+            builder.RegisterType<UserForgotPasswordRepo>().As<IUserForgotPasswordRepository>();
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces().EnableInterfaceInterceptors(new ProxyGenerationOptions()

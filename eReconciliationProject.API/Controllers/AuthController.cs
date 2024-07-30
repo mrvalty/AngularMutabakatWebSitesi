@@ -1,8 +1,11 @@
 ﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Core.Utilities.Hashing;
+using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.Entities.Concrete;
 using eReconciliationProject.Entities.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace eReconciliationProject.API.Controllers
 {
@@ -11,10 +14,12 @@ namespace eReconciliationProject.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IUserForgotPasswordService _userForgotPasswordService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IUserForgotPasswordService userForgotPasswordService)
         {
             _authService = authService;
+            _userForgotPasswordService = userForgotPasswordService;
         }
 
         [HttpPost("register")]
@@ -71,7 +76,7 @@ namespace eReconciliationProject.API.Controllers
             {
                 return BadRequest(userToLogin.Message);
             }
-            if(userToLogin.Data.IsActive)
+            if (userToLogin.Data.IsActive)
             {
                 var userCompany = _authService.GetCompany(userToLogin.Data.Id).Data;
                 var result = _authService.CreateAccessToken(userToLogin.Data, userCompany.CompanyId);
@@ -103,11 +108,10 @@ namespace eReconciliationProject.API.Controllers
                 return Ok(result);
             }
 
-            return BadRequest(result.Message);    
+            return BadRequest(result.Message);
         }
 
         [HttpGet("sendConfirmEmail")]
-
         public IActionResult SendConfirmEmail(string email)
         {
             var user = _authService.GetByEmail(email).Data;
@@ -115,17 +119,95 @@ namespace eReconciliationProject.API.Controllers
             {
                 return BadRequest("Kullanıcı sistemde mevcut değil.");
             }
-            if(user.MailConfirm)
+            if (user.MailConfirm)
             {
                 return BadRequest("Kullanıcı daha önce maili onaylamış.");
             }
 
-            var result= _authService.SendConfirmedEmail(user);
+            var result = _authService.SendConfirmedEmail(user);
             if (result.Success)
             {
                 return Ok(result);
             }
 
+            return BadRequest(result.Message);
+        }
+
+        [HttpGet("forgotPassword")]
+        public IActionResult UserForgotPassword(string email)
+        {
+            var user = _authService.GetByEmail(email).Data;
+            if (user == null)
+            {
+                return BadRequest("Kullanıcı Bulunamadı.");
+            }
+
+            var lists = _userForgotPasswordService.GetListByUserId(user.Id).Data;
+            foreach (var list in lists)
+            {
+                list.IsActive = false;
+                _userForgotPasswordService.Update(list);
+            }
+            var forgotPassword = _userForgotPasswordService.CreateForgotPassword(user).Data;
+            var result = _authService.SendForgotPasswordEmail(user, forgotPassword.Value);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
+
+
+
+        }
+
+        [HttpGet("forgotPasswordLinkCheck")]
+        public IActionResult ForgotPasswordLinkCheck(string value)
+        {
+            var result = _userForgotPasswordService.GetForgotPassword(value);
+            if (result == null)
+            {
+                return BadRequest("Tıkladığınız link geçersizdir");
+            }
+            if (result.IsActive)
+            {
+                DateTime date1 = DateTime.Now.AddHours(-1);
+                DateTime date2 = DateTime.Now;
+                if (result.SendDate >= date1 && result.SendDate <= date2)
+                {
+                    return Ok(true);
+                }
+                else
+                {
+                    return BadRequest("Tıkladığınız link geçersizdir");
+
+                }
+
+            }
+            else
+            {
+                return BadRequest("Tıkladığınız link geçersizdir");
+            }
+        }
+
+        [HttpPost("changePasswordToForgotPassword")]
+        public IActionResult ChangePasswordToForgotPassword(UserForgotPasswordDto passwordDto)
+        {
+            var forgotPasswordResult = _userForgotPasswordService.GetForgotPassword(passwordDto.Value);
+            forgotPasswordResult.IsActive = false;
+            _userForgotPasswordService.Update(forgotPasswordResult);
+
+            var userResult = _authService.GetById(forgotPasswordResult.UserId).Data;
+            
+                byte[] passwordHash, passwordSalt;
+                HashingHelper.CreatePasswordHash(passwordDto.Password, out passwordHash, out passwordSalt);
+                userResult.PasswordHash = passwordHash;
+                userResult.PasswordSalt = passwordSalt;
+                var result = _authService.Update(userResult);
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+               
             return BadRequest(result.Message);
         }
     }
