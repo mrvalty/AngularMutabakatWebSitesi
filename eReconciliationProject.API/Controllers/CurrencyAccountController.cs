@@ -1,10 +1,6 @@
-﻿using eReconciliationProject.Business.Abstract;
-using eReconciliationProject.DA.Repositories.Abstract;
+﻿using eReconciliationProject.Business.Concrete;
 using eReconciliationProject.Entities.Concrete;
-using eReconciliationProject.Entities.Dtos;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.Design;
 
 namespace eReconciliationProject.API.Controllers
 {
@@ -12,17 +8,18 @@ namespace eReconciliationProject.API.Controllers
     [ApiController]
     public class CurrencyAccountController : ControllerBase
     {
-        private readonly ICurrencyAccountService _currencyAccountService;
+        private readonly CurrencyAccountManager _currencyAccountManager;
 
-        public CurrencyAccountController(ICurrencyAccountService currencyAccountRepository)
+        public CurrencyAccountController(CurrencyAccountManager currencyAccountManager)
         {
-            _currencyAccountService = currencyAccountRepository;
-        }
+            _currencyAccountManager = currencyAccountManager;
+        }//tamam bu sorunu çözdü. Bu kısımda bunu böyule kullan
+
         [HttpPost("add")]
         public IActionResult Add(CurrencyAccount currencyAccount)
         {
-            var result = _currencyAccountService.Add(currencyAccount);
-            if(result.Success)
+            var result = _currencyAccountManager.Add(currencyAccount);
+            if (result.Success)
             {
                 return Ok(result);
             }
@@ -31,7 +28,7 @@ namespace eReconciliationProject.API.Controllers
         [HttpPost("update")]
         public IActionResult Update(CurrencyAccount currencyAccount)
         {
-            var result = _currencyAccountService.Update(currencyAccount);
+            var result = _currencyAccountManager.Update(currencyAccount);
             if (result.Success)
             {
                 return Ok(result);
@@ -42,7 +39,7 @@ namespace eReconciliationProject.API.Controllers
         [HttpPost("delete")]
         public IActionResult Delete(CurrencyAccount currencyAccount)
         {
-            var result = _currencyAccountService.Delete(currencyAccount);
+            var result = _currencyAccountManager.Delete(currencyAccount);
             if (result.Success)
             {
                 return Ok(result);
@@ -53,7 +50,7 @@ namespace eReconciliationProject.API.Controllers
         [HttpGet("getbyid")]
         public IActionResult GetById(int id)
         {
-            var result = _currencyAccountService.Get(id);
+            var result = _currencyAccountManager.Get(id);
             if (result.Success)
             {
                 return Ok(result);
@@ -63,7 +60,7 @@ namespace eReconciliationProject.API.Controllers
         [HttpGet("getlist")]
         public IActionResult GetList(int companyId)
         {
-            var result = _currencyAccountService.GetList(companyId);
+            var result = _currencyAccountManager.GetList(companyId);
             if (result.Success)
             {
                 return Ok(result);
@@ -72,20 +69,20 @@ namespace eReconciliationProject.API.Controllers
         }
 
         [HttpPost("addFromExcel")]
-        public IActionResult AddFromExcel(IFormFile file ,int companyId)
+        public IActionResult AddFromExcel(IFormFile file, int companyId)
         {
-           
+
             if (file.Length > 0)
             {
-                var fileName = Guid.NewGuid().ToString()+ ".xlsx";
+                var fileName = Guid.NewGuid().ToString() + ".xlsx";
                 var filePath = $"{Directory.GetCurrentDirectory()}/Content/{fileName}";
-                using(FileStream stream = System.IO.File.Create(filePath))
+                using (FileStream stream = System.IO.File.Create(filePath))
                 {
                     file.CopyTo(stream);
-                    stream.Flush(); 
+                    stream.Flush();
                 }
 
-                var result = _currencyAccountService.AddToExcel(filePath,companyId);
+                var result = _currencyAccountManager.AddToExcel(filePath, companyId);
                 if (result.Success)
                 {
                     return Ok(result);
@@ -93,8 +90,8 @@ namespace eReconciliationProject.API.Controllers
                 return BadRequest(result.Message);
             }
             return BadRequest("Lütfen Dosya Seçiniz.");
-           
-           
+
+
         }
     }
 }

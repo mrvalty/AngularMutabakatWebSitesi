@@ -1,11 +1,6 @@
 ﻿using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Entities.Concrete;
 using eReconciliationProject.Entities.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.Business.Abstract
 {
@@ -20,6 +15,7 @@ namespace eReconciliationProject.Business.Abstract
         IDataResult<BaBsReconciliation> GetByCode(string code);
 
         IDataResult<List<BaBsReconciliation>> GetList(int companyId);
+        IDataResult<List<BaBsReconciliation>> GetByIdCurrencyAccount(int currencyAccountId);
         IDataResult<List<BaBsReconciliationDto>> GetListDto(int companyId);
 
         IResult SendReconciliationMail(BaBsReconciliationDto babsReconciliatonDto);

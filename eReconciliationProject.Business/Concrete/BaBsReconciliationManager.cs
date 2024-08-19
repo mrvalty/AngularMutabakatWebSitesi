@@ -10,19 +10,14 @@ using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
 using eReconciliationProject.Entities.Dtos;
 using ExcelDataReader;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.Business.Concrete
 {
     public class BaBsReconciliationManager : IBaBsReconciliationService
     {
         private readonly IBaBsReconciliationRepository _baBsReconciliationRepository;
-        private readonly ICurrencyAccountService _currencyAccountService;
+        private readonly ICurrencyAccountService _currencyAccountManager;
         private readonly IMailService _mailService;
         private readonly IMailTemplateService _mailTemplateService;
         private readonly IMailParameterService _mailParameterService;
@@ -31,7 +26,7 @@ namespace eReconciliationProject.Business.Concrete
         public BaBsReconciliationManager(IBaBsReconciliationRepository baBsReconciliationRepository, ICurrencyAccountService currencyAccountService, IMailService mailService, IMailTemplateService mailTemplateService, IMailParameterService mailParameterService)
         {
             _baBsReconciliationRepository = baBsReconciliationRepository;
-            _currencyAccountService = currencyAccountService;
+            _currencyAccountManager = currencyAccountService;
             _mailService = mailService;
             _mailTemplateService = mailTemplateService;
             _mailParameterService = mailParameterService;
@@ -109,7 +104,7 @@ namespace eReconciliationProject.Business.Concrete
                             double quantity = reader.GetDouble(4);
                             double total = reader.GetDouble(5);
 
-                            int currencyAccountId = _currencyAccountService.GetByCode(code, companyId).Data.Id;
+                            int currencyAccountId = _currencyAccountManager.GetByCode(code, companyId).Data.Id;
                             string guid = Guid.NewGuid().ToString();
                             BaBsReconciliation baBsReconciliation = new BaBsReconciliation()
                             {
@@ -183,6 +178,14 @@ namespace eReconciliationProject.Business.Concrete
         public IDataResult<List<BaBsReconciliationDto>> GetListDto(int companyId)
         {
             return new SuccessDataResult<List<BaBsReconciliationDto>>(_baBsReconciliationRepository.GetAllDto(companyId));
+        }
+
+        [PerformanceAspect(3)]
+        [SecuredOperation("BaBsReconciliation.GetList,Admin")]
+        [CacheAspect(60)]
+        public IDataResult<List<BaBsReconciliation>> GetByIdCurrencyAccount(int currencyAccountId)
+        {
+            return new SuccessDataResult<List<BaBsReconciliation>>(_baBsReconciliationRepository.GetList(x => x.CurrencyAccountId == currencyAccountId));
         }
     }
 }

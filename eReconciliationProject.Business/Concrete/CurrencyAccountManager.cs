@@ -8,26 +8,25 @@ using eReconciliationProject.Core.Aspects.Caching;
 using eReconciliationProject.Core.Aspects.Performance;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
+using eReconciliationProject.DA.Context;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
 using ExcelDataReader;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.Business.Concrete
 {
     public class CurrencyAccountManager : ICurrencyAccountService
     {
         private readonly ICurrencyAccountRepository _currencyAccountRepository;
+        private readonly IAccountReconciliationService _accountReconciliationService;
+        private readonly IBaBsReconciliationService _baBsReconciliationService;
+        ProjectContext context = new();
 
-        public CurrencyAccountManager(ICurrencyAccountRepository currencyAccountRepository)
-        {
-            _currencyAccountRepository = currencyAccountRepository;
-        }
+        //public CurrencyAccountManager(ICurrencyAccountRepository currencyAccountRepository)
+        //{
+        //    _currencyAccountRepository = currencyAccountRepository;
+        //}
 
         [PerformanceAspect(3)]
         [SecuredOperation("CurrencyAccountValidator.Add,Admin")]
@@ -44,7 +43,27 @@ namespace eReconciliationProject.Business.Concrete
         [CacheRemoveAspect("ICurrencyAccountService.Get")]
         public IResult Delete(CurrencyAccount currencyAccount)
         {
-            _currencyAccountRepository.Delete(currencyAccount);
+            var reconciliaiton = context.AccountReconciliatons.Where(x => x.CurrencyAccountId == currencyAccount.Id).ToList();
+            if (reconciliaiton.Count > 0)
+            {
+                return new ErrorResult(Messages.AccountHaveReconciliation);
+            }
+
+            var baBsReconciliation = context.BaBsReconciliations.Where(x => x.CurrencyAccountId == currencyAccount.Id).ToList();
+            if (baBsReconciliation.Count > 0)
+            {
+                return new ErrorResult(Messages.AccountHaveReconciliation);
+            }
+
+            //context.CurrencyAccounts.Remove(currencyAccount);
+            //_currencyAccountRepository.Delete(currencyAccount);
+            var result = context.CurrencyAccounts.Where(x => x.Id == currencyAccount.Id && x.IsActive == true).FirstOrDefault();
+            if (result != null)
+            {
+                result.IsActive = false;
+            }
+            context.SaveChanges();
+
             return new SuccessResult(Messages.DeletedCurrencyAccount);
         }
 
@@ -53,7 +72,7 @@ namespace eReconciliationProject.Business.Concrete
         [CacheAspect(60)]
         public IDataResult<CurrencyAccount> Get(int id)
         {
-           return new SuccessDataResult<CurrencyAccount>(_currencyAccountRepository.Get(x=>x.Id == id));
+            return new SuccessDataResult<CurrencyAccount>(_currencyAccountRepository.Get(x => x.Id == id));
         }
 
         [PerformanceAspect(3)]
@@ -61,7 +80,11 @@ namespace eReconciliationProject.Business.Concrete
         [CacheAspect(60)]
         public IDataResult<List<CurrencyAccount>> GetList(int companyId)
         {
-            return new SuccessDataResult<List<CurrencyAccount>>(_currencyAccountRepository.GetList(x => x.CompanyId == companyId));
+            var result = context.CurrencyAccounts.Where(p => p.CompanyId == companyId && p.IsActive == true).OrderBy(x => x.Name).ToList();
+
+            return new SuccessDataResult<List<CurrencyAccount>>(result);
+
+            //return new SuccessDataResult<List<CurrencyAccount>>(_currencyAccountRepository.GetList(x => x.CompanyId == companyId));
         }
 
         [PerformanceAspect(3)]
@@ -80,14 +103,14 @@ namespace eReconciliationProject.Business.Concrete
         [CacheRemoveAspect("ICurrencyAccountService.Get")]
         [ValidationAspect(typeof(CurrencyAccountValidator))]
         [TransactionScopeAspect]
-        public IResult AddToExcel(string filePath,int companyId)
+        public IResult AddToExcel(string filePath, int companyId)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            using(var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
+            using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
             {
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
-                    while(reader.Read())
+                    while (reader.Read())
                     {
                         string code = reader.GetString(0);
                         string name = reader.GetString(1);
@@ -98,7 +121,7 @@ namespace eReconciliationProject.Business.Concrete
                         string email = reader.GetString(6);
                         string authorized = reader.GetString(7);
 
-                        if(code != "Cari Kodu")
+                        if (code != "Cari Kodu")
                         {
                             CurrencyAccount currencyAccount = new CurrencyAccount()
                             {

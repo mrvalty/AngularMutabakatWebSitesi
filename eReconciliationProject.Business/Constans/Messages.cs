@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace eReconciliationProject.Business.Constans
+﻿namespace eReconciliationProject.Business.Constans
 {
     public class Messages
     {
@@ -38,8 +32,9 @@ namespace eReconciliationProject.Business.Constans
         public static string AddedCurrencyAccount = "Cari Kaydı Başarıyla Eklendi.";
         public static string UpdatedCurrencyAccount = "Cari Kaydı Başarıyla Güncellendi..";
         public static string DeletedCurrencyAccount = "Cari Kaydı Başarıyla Silindi.";
-        
-        
+        public static string AccountHaveReconciliation = "Mutabakat kaydı bulunan cari kayıt silinemez";
+
+
         public static string AddedAccountReconciliation = "Cari Mutabakat Kaydı Başarıyla Eklendi.";
         public static string UpdatedAccountReconciliation = "Cari Mutabakat Kaydı Başarıyla Güncellendi..";
         public static string DeletedAccountReconciliation = "Cari Mutabakat Kaydı Başarıyla Silindi.";
@@ -56,15 +51,15 @@ namespace eReconciliationProject.Business.Constans
 
         public static string AddedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Eklendi.";
         public static string UpdatedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Güncellendi..";
-        public static string DeletedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Silindi."; 
-        
-                
+        public static string DeletedBaBsReconciliationDetail = "BaBs Detay Kaydı Başarıyla Silindi.";
+
+
         public static string AddedOperationClaim = "Yetki Başarıyla Eklendi.";
         public static string UpdatedOperationClaim = "Yetki Başarıyla Güncellendi..";
         public static string DeletedOperationClaim = "Yetki Başarıyla Silindi.";
 
         public static string AddedUserOperationClaim = "Kullanıcıya Yetki Başarıyla Eklendi.";
-        public static string UpdatedUserOperationClaim = "Kullanıcıya Yetki Başarıyla Güncellendi.."; 
+        public static string UpdatedUserOperationClaim = "Kullanıcıya Yetki Başarıyla Güncellendi..";
         public static string DeletedUserOperationClaim = "Kullanıcıya Yetki Başarıyla Silindi.";
 
 

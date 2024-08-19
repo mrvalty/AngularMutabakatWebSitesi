@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace eReconciliationProject.Core.Utilities.Results.Concrete
+﻿namespace eReconciliationProject.Core.Utilities.Results.Concrete
 {
     public class SuccessDataResult<T> : DataResult<T>
     {
@@ -16,9 +10,9 @@ namespace eReconciliationProject.Core.Utilities.Results.Concrete
         {
         }
 
-        public SuccessDataResult():base(default,true)
+        public SuccessDataResult() : base(default!, true)
         {
-            
+
         }
     }
 }

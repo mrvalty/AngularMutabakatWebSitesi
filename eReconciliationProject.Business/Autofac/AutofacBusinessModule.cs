@@ -7,11 +7,6 @@ using eReconciliationProject.Core.Utilities.Interceptors;
 using eReconciliationProject.Core.Utilities.Security.JWT;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.DA.Repositories.Concrete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.Business.Autofac
 {
@@ -37,7 +32,7 @@ namespace eReconciliationProject.Business.Autofac
             builder.RegisterType<BaBsReconciliationRepo>().As<IBaBsReconciliationRepository>();
 
 
-            builder.RegisterType<CurrencyAccountManager>().As<ICurrencyAccountService>();
+            //builder.RegisterType<CurrencyAccountManager>().As<ICurrencyAccountService>();
             builder.RegisterType<CurrencyAccountRepo>().As<ICurrencyAccountRepository>();
 
             builder.RegisterType<CurrencyManager>().As<ICurrencyService>();
@@ -67,8 +62,8 @@ namespace eReconciliationProject.Business.Autofac
             builder.RegisterType<UserOperationClaimRepo>().As<IUserOperationClaimRepository>();
 
             builder.RegisterType<TermsandCoditionManager>().As<ITermsandConditionService>();
-            builder.RegisterType<TermsandConditionRepo>().As<ITermsandConditionsRepository>(); 
-            
+            builder.RegisterType<TermsandConditionRepo>().As<ITermsandConditionsRepository>();
+
             builder.RegisterType<UserForgotPasswordManager>().As<IUserForgotPasswordService>();
             builder.RegisterType<UserForgotPasswordRepo>().As<IUserForgotPasswordRepository>();
 

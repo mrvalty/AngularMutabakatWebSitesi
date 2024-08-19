@@ -1,9 +1,4 @@
 ﻿using eReconciliationProject.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.Entities.Concrete
 {
@@ -19,7 +14,7 @@ namespace eReconciliationProject.Entities.Concrete
         public string? IdentityNumber { get; set; }
         public string? Email { get; set; }
         public string? Authorized { get; set; }
-        public DateTime? AddedAt { get; set; }
+        public DateTime AddedAt { get; set; }
         public bool? IsActive { get; set; }
     }
 }

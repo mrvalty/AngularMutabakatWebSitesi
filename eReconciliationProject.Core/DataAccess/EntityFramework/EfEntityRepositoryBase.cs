@@ -1,17 +1,10 @@
 ﻿using eReconciliationProject.Core.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.Core.DataAccess.EntityFramework
 {
-    public class EfEntityRepositoryBase<TEntity, TContext> : IEntityRepository<TEntity>
-        where TEntity : class, IEntity, new()
-        where TContext : DbContext, new()
+    public class EfEntityRepositoryBase<TEntity, TContext> : IEntityRepository<TEntity> where TEntity : class, IEntity, new() where TContext : DbContext, new()
     {
         public void Add(TEntity entity)
         {
@@ -28,12 +21,12 @@ namespace eReconciliationProject.Core.DataAccess.EntityFramework
             using (var context = new TContext())
             {
                 var deletedEntity = context.Entry(entity);
-                deletedEntity.State = EntityState.Deleted;
+                //deletedEntity.State = EntityState.Deleted;
                 context.SaveChanges();
             }
         }
 
-        public TEntity Get(Expression<Func<TEntity, bool>> filter = null)
+        public TEntity? Get(Expression<Func<TEntity, bool>> filter)
         {
             using (var context = new TContext())
             {
@@ -41,11 +34,16 @@ namespace eReconciliationProject.Core.DataAccess.EntityFramework
             }
         }
 
-        public List<TEntity> GetList(Expression<Func<TEntity, bool>> filter = null)
+        public List<TEntity> GetList(Expression<Func<TEntity, bool>>? filter = null)
         {
             using (var context = new TContext())
             {
-               return filter == null ? context.Set<TEntity>().ToList() : context.Set<TEntity>().Where(filter).ToList();
+                if (filter is null)
+                {
+                    return context.Set<TEntity>().ToList();
+                }
+
+                return context.Set<TEntity>().Where(filter).ToList();
             }
         }
 

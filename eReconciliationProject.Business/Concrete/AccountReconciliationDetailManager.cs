@@ -20,13 +20,13 @@ namespace eReconciliationProject.Business.Concrete
     public class AccountReconciliationDetailManager : IAccountReconciliationDetailService
     {
         private readonly IAccountReconciliationDetailRepository _accountReconciliationDetailRepository;
-        private readonly ICurrencyAccountService _currencyAccountService;
+        private readonly ICurrencyAccountService _currencyAccountManager;
 
 
         public AccountReconciliationDetailManager(IAccountReconciliationDetailRepository accountReconciliationDetailRepository, ICurrencyAccountService currencyAccountService)
         {
             _accountReconciliationDetailRepository = accountReconciliationDetailRepository;
-            _currencyAccountService = currencyAccountService;
+            _currencyAccountManager = currencyAccountService;
         }
 
         [PerformanceAspect(3)]

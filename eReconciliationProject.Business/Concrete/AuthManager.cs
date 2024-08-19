@@ -55,7 +55,8 @@ namespace eReconciliationProject.Business.Concrete
         public IDataResult<AccessToken> CreateAccessToken(User user,int companyId)
         {
             var claims = _userService.GetClaims(user, companyId);
-            var accessToken = _tokenHelper.CreateToken(user,claims,companyId);
+            var company = _companyService.GetById(companyId).Data;
+            var accessToken = _tokenHelper.CreateToken(user,claims,companyId,company.Name);
             return new SuccessDataResult<AccessToken>(accessToken,Messages.SuccessfulLogin);
         }
 
@@ -268,5 +269,6 @@ namespace eReconciliationProject.Business.Concrete
             _userService.Update(user);
             return new SuccessResult(Messages.ChangePasswordSuccess);
         }
+
     }
 }

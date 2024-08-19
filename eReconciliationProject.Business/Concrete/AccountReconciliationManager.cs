@@ -4,26 +4,20 @@ using eReconciliationProject.Business.Constans;
 using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Aspects.Caching;
 using eReconciliationProject.Core.Aspects.Performance;
-using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
 using eReconciliationProject.Entities.Dtos;
 using ExcelDataReader;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.Business.Concrete
 {
     public class AccountReconciliationManager : IAccountReconciliationService
     {
         private readonly IAccountReconciliatonRepository _accountReconciliatonRepository;
-        private readonly ICurrencyAccountService _currencyAccountService;
+        private readonly ICurrencyAccountService _currencyAccountManager;
         private readonly IMailService _mailService;
         private readonly IMailTemplateService _mailTemplateService;
         private readonly IMailParameterService _mailParameterService;
@@ -31,7 +25,7 @@ namespace eReconciliationProject.Business.Concrete
         public AccountReconciliationManager(IAccountReconciliatonRepository accountReconciliatonRepository, ICurrencyAccountService currencyAccountService, IMailService mailService, IMailTemplateService mailTemplateService, IMailParameterService mailParameterService)
         {
             _accountReconciliatonRepository = accountReconciliatonRepository;
-            _currencyAccountService = currencyAccountService;
+            _currencyAccountManager = currencyAccountService;
             _mailService = mailService;
             _mailTemplateService = mailTemplateService;
             _mailParameterService = mailParameterService;
@@ -110,7 +104,7 @@ namespace eReconciliationProject.Business.Concrete
                             double debit = reader.GetDouble(4);
                             double credit = reader.GetDouble(5);
 
-                            int currencyAccountId = _currencyAccountService.GetByCode(code, companyId).Data.Id;
+                            int currencyAccountId = _currencyAccountManager.GetByCode(code, companyId).Data.Id;
                             string guid = Guid.NewGuid().ToString();
                             AccountReconciliaton accountReconciliaton = new AccountReconciliaton()
                             {
@@ -121,7 +115,7 @@ namespace eReconciliationProject.Business.Concrete
                                 CurrencyId = Convert.ToInt32(currencyId),
                                 StartingDate = startingDate,
                                 EndingDate = endingDate,
-                                Guid=guid
+                                Guid = guid
                             };
 
                             _accountReconciliatonRepository.Add(accountReconciliaton);
@@ -180,10 +174,18 @@ namespace eReconciliationProject.Business.Concrete
         [PerformanceAspect(3)]
         [SecuredOperation("AccountReconciliation.GetList,Admin")]
         [CacheAspect(60)]
-        public IDataResult<List<Entities.Dtos.AccountReconciliationDto>> GetListDto(int companyId)
+        public IDataResult<List<AccountReconciliationDto>> GetListDto(int companyId)
         {
             return new SuccessDataResult<List<AccountReconciliationDto>>(_accountReconciliatonRepository.GetAllDto(companyId));
         }
 
+        [PerformanceAspect(3)]
+        [SecuredOperation("AccountReconciliation.GetList,Admin")]
+        [CacheAspect(60)]
+        public IDataResult<List<AccountReconciliaton>> GetByIdCurrencyAccount(int currencyAccountId)
+        {
+            return new SuccessDataResult<List<AccountReconciliaton>>(_accountReconciliatonRepository.GetList(x => x.CurrencyAccountId == currencyAccountId));
+
+        }
     }
 }
