@@ -34,7 +34,23 @@ namespace eReconciliationProject.Business.Concrete
         [ValidationAspect(typeof(CurrencyAccountValidator))]
         public IResult Add(CurrencyAccount currencyAccount)
         {
-            _currencyAccountRepository.Add(currencyAccount);
+            CurrencyAccount currency = new CurrencyAccount()
+            {
+                Name = currencyAccount.Name,
+                CompanyId = currencyAccount.CompanyId,
+                AddedAt = currencyAccount.AddedAt,
+                Address = currencyAccount.Address,
+                Authorized = currencyAccount.Authorized,
+                Code = currencyAccount.Code,
+                Email = currencyAccount.Email,
+                IdentityNumber = currencyAccount.IdentityNumber,
+                IsActive = currencyAccount.IsActive,
+                TaxDepartment = currencyAccount.TaxDepartment,
+                TaxIdNumber = currencyAccount.TaxIdNumber,
+            };
+            context.CurrencyAccounts.Add(currency);
+            context.SaveChanges();
+            //_currencyAccountRepository.Add(currencyAccount);
             return new SuccessResult(Messages.AddedCurrencyAccount);
         }
 
@@ -72,7 +88,14 @@ namespace eReconciliationProject.Business.Concrete
         [CacheAspect(60)]
         public IDataResult<CurrencyAccount> Get(int id)
         {
-            return new SuccessDataResult<CurrencyAccount>(_currencyAccountRepository.Get(x => x.Id == id));
+            var result = context.CurrencyAccounts.FirstOrDefault(x => x.Id == id);
+            if (result != null)
+            {
+                return new SuccessDataResult<CurrencyAccount>(result);
+            }
+            return new SuccessDataResult<CurrencyAccount>();
+
+            //return new SuccessDataResult<CurrencyAccount>(_currencyAccountRepository.Get(x => x.Id == id));
         }
 
         [PerformanceAspect(3)]
@@ -93,7 +116,22 @@ namespace eReconciliationProject.Business.Concrete
         [ValidationAspect(typeof(CurrencyAccountValidator))]
         public IResult Update(CurrencyAccount currencyAccount)
         {
-            _currencyAccountRepository.Update(currencyAccount);
+            var result = context.CurrencyAccounts.Where(x => x.Id == currencyAccount.Id && x.IsActive == true).FirstOrDefault();
+            if (result != null)
+            {
+
+                result.Code = currencyAccount.Code;
+                result.Name = currencyAccount.Name;
+                result.IdentityNumber = currencyAccount.IdentityNumber;
+                result.Address = currencyAccount.Address;
+                result.TaxIdNumber = currencyAccount.TaxIdNumber;
+                result.Authorized = currencyAccount.Authorized;
+                result.TaxDepartment = currencyAccount.TaxDepartment;
+                context.CurrencyAccounts.Update(result);
+                context.SaveChanges();
+            }
+
+            //_currencyAccountRepository.Update(currencyAccount);
             return new SuccessResult(Messages.UpdatedCurrencyAccount);
         }
 
@@ -137,8 +175,9 @@ namespace eReconciliationProject.Business.Concrete
                                 CompanyId = companyId,
                                 IsActive = true
                             };
-
-                            _currencyAccountRepository.Add(currencyAccount);
+                            context.CurrencyAccounts.Add(currencyAccount);
+                            context.SaveChanges();
+                            //_currencyAccountRepository.Add(currencyAccount);
                         }
                     }
                 }
