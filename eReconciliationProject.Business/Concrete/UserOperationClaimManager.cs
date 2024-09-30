@@ -5,11 +5,7 @@ using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using eReconciliationProject.Entities.Dtos;
 
 namespace eReconciliationProject.Business.Concrete
 {
@@ -43,6 +39,12 @@ namespace eReconciliationProject.Business.Concrete
         {
             return new SuccessDataResult<List<UserOperationClaim>>(_userOperationClaimRepository.GetList(x => x.UserId == userId && x.CompanyId == companyId));
         }
+
+        public IDataResult<List<UserOperationClaimDto>> GetListDto(int userId, int companyId)
+        {
+            return new SuccessDataResult<List<UserOperationClaimDto>>(_userOperationClaimRepository.GetListDto(userId, companyId));
+        }
+
         [SecuredOperation("UserOperationClaim.Update,Admin")]
         public IResult Update(UserOperationClaim userOperationClaim)
         {

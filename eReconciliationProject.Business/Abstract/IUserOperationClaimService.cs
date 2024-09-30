@@ -1,10 +1,6 @@
 ﻿using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using eReconciliationProject.Entities.Dtos;
 
 namespace eReconciliationProject.Business.Abstract
 {
@@ -15,6 +11,7 @@ namespace eReconciliationProject.Business.Abstract
         IResult Delete(UserOperationClaim userOperationClaim);
         IDataResult<UserOperationClaim> GetById(int id);
         IDataResult<List<UserOperationClaim>> GetList(int userId, int companyId);
+        IDataResult<List<UserOperationClaimDto>> GetListDto(int userId, int companyId);
 
     }
 }

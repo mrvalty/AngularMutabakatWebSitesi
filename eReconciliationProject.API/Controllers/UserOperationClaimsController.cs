@@ -1,6 +1,5 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Core.Concrete;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eReconciliationProject.API.Controllers
@@ -63,6 +62,18 @@ namespace eReconciliationProject.API.Controllers
         public IActionResult GetList(int userId, int companyId)
         {
             var result = _userOperationClaimService.GetList(userId, companyId);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
+        }
+
+        [HttpGet("getListDto")]
+        public IActionResult GetListDto(int userId, int companyId)
+
+        {
+            var result = _userOperationClaimService.GetListDto(userId, companyId);
             if (result.Success)
             {
                 return Ok(result);

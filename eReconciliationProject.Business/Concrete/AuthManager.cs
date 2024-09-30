@@ -1,25 +1,14 @@
 ﻿using eReconciliationProject.Business.Abstract;
 using eReconciliationProject.Business.Constans;
-using eReconciliationProject.Business.ValidationRules.FluentValidation;
 using eReconciliationProject.Core.Aspects.Autofac.Transaction;
 using eReconciliationProject.Core.Concrete;
-using eReconciliationProject.Core.CrossCuttingConcerns.Validation;
 using eReconciliationProject.Core.Utilities.Hashing;
 using eReconciliationProject.Core.Utilities.Results.Abstract;
 using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.Core.Utilities.Security.JWT;
-using eReconciliationProject.DA.Repositories.Abstract;
+using eReconciliationProject.DA.Context;
 using eReconciliationProject.Entities.Concrete;
 using eReconciliationProject.Entities.Dtos;
-using FluentValidation;
-using Microsoft.VisualBasic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using static System.Net.WebRequestMethods;
 
 namespace eReconciliationProject.Business.Concrete
 {
@@ -31,8 +20,11 @@ namespace eReconciliationProject.Business.Concrete
         private readonly IMailService _mailService;
         private readonly IMailParameterService _mailParameterService;
         private readonly IMailTemplateService _mailTemplateService;
+        private readonly IOperationClaimService _operationClaimService;
+        ProjectContext context = new();
 
-        public AuthManager(IUserService userService, ITokenHelper tokenHelper, ICompanyService companyService, IMailService mailService, IMailParameterService mailParameterService, IMailTemplateService mailTemplateService)
+
+        public AuthManager(IUserService userService, ITokenHelper tokenHelper, ICompanyService companyService, IMailService mailService, IMailParameterService mailParameterService, IMailTemplateService mailTemplateService, IOperationClaimService operationClaimService)
         {
             _userService = userService;
             _tokenHelper = tokenHelper;
@@ -40,6 +32,7 @@ namespace eReconciliationProject.Business.Concrete
             _mailService = mailService;
             _mailParameterService = mailParameterService;
             _mailTemplateService = mailTemplateService;
+            _operationClaimService = operationClaimService;
         }
 
         public IResult CompanyExists(Company company)
@@ -52,12 +45,12 @@ namespace eReconciliationProject.Business.Concrete
             return new SuccessResult();
         }
 
-        public IDataResult<AccessToken> CreateAccessToken(User user,int companyId)
+        public IDataResult<AccessToken> CreateAccessToken(User user, int companyId)
         {
             var claims = _userService.GetClaims(user, companyId);
             var company = _companyService.GetById(companyId).Data;
-            var accessToken = _tokenHelper.CreateToken(user,claims,companyId,company.Name);
-            return new SuccessDataResult<AccessToken>(accessToken,Messages.SuccessfulLogin);
+            var accessToken = _tokenHelper.CreateToken(user, claims, companyId, company.Name);
+            return new SuccessDataResult<AccessToken>(accessToken, Messages.SuccessfulLogin);
         }
 
         public IDataResult<User> GetById(int id)
@@ -85,10 +78,10 @@ namespace eReconciliationProject.Business.Concrete
         }
 
         [TransactionScopeAspect] //işlemde hata varsa devam ettirmez sonlandırır
-        public IDataResult<UserCompanyDto> Register(UserForRegister userForRegister, string password,Company company)
+        public IDataResult<UserCompanyDto> Register(UserForRegister userForRegister, string password, Company company)
         {
             byte[] passwordHash, passwordSalt;
-            HashingHelper.CreatePasswordHash(password,out passwordHash, out passwordSalt);
+            HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
             var user = new User()
             {
                 Email = userForRegister.Email,
@@ -97,9 +90,9 @@ namespace eReconciliationProject.Business.Concrete
                 MailConfirm = false,
                 MailConfirmDate = DateTime.Now,
                 MailConfirmValue = Guid.NewGuid().ToString(),
-                PasswordHash=passwordHash,
-                PasswordSalt=passwordSalt,
-                Name=userForRegister.Name,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
+                Name = userForRegister.Name,
             };
 
 
@@ -109,22 +102,42 @@ namespace eReconciliationProject.Business.Concrete
             _userService.Add(user);
             _companyService.Add(company);
 
-            _companyService.UserCompanyAdd(user.Id,company.Id);
+            _companyService.UserCompanyAdd(user.Id, company.Id);
 
             UserCompanyDto userCompanyDto = new UserCompanyDto()
             {
-                Id=user.Id,
-                Name=user.Name,
-                Email=user.Email,
-                AddedAt=DateTime.Now,
-                CompanyId=company.Id,
-                IsActive=true,
-                MailConfirm=user.MailConfirm,
-                MailConfirmDate=user.MailConfirmDate,
-                MailConfirmValue=user.MailConfirmValue,
-                PasswordHash=user.PasswordHash,
-                PasswordSalt=user.PasswordSalt
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                AddedAt = DateTime.Now,
+                CompanyId = company.Id,
+                IsActive = true,
+                MailConfirm = user.MailConfirm,
+                MailConfirmDate = user.MailConfirmDate,
+                MailConfirmValue = user.MailConfirmValue,
+                PasswordHash = user.PasswordHash,
+                PasswordSalt = user.PasswordSalt
             };
+
+            var operationClaims = _operationClaimService.GetList().Data;
+
+            foreach (var operationClaim in operationClaims)
+            {
+                if (operationClaim.Id != 1 && operationClaim.Id != 47 && operationClaim.Id != 48 && !operationClaim.Name.Contains("UserOperationClaim"))
+                {
+                    UserOperationClaim userOperationClaim = new UserOperationClaim()
+                    {
+                        CompanyId = company.Id,
+                        AddedAt = DateTime.Now,
+                        OperationClaimId = operationClaim.Id,
+                        IsActive = true,
+                        UserId = user.Id
+                    };
+                    context.UserOperationClaims.Add(userOperationClaim);
+                    context.SaveChanges();
+
+                }
+            }
 
             SendConfirmEmail(user);
             return new SuccessDataResult<UserCompanyDto>(userCompanyDto, Messages.UserRegistered);
@@ -158,7 +171,7 @@ namespace eReconciliationProject.Business.Concrete
             user.MailConfirmDate = DateTime.Now;
             _userService.Update(user);
         }
-        public IDataResult<User> RegisterSecondAccount(UserForRegister userForRegister, string password,int companyId)
+        public IDataResult<User> RegisterSecondAccount(UserForRegister userForRegister, string password, int companyId)
         {
             byte[] passwordHash, passwordSalt;
             HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
@@ -190,7 +203,7 @@ namespace eReconciliationProject.Business.Concrete
 
         public IResult UserExists(string email)
         {
-            if(_userService.GetByMail(email) !=null)
+            if (_userService.GetByMail(email) != null)
             {
                 return new ErrorResult(Messages.UserAlReadyExists);
             }
@@ -199,16 +212,16 @@ namespace eReconciliationProject.Business.Concrete
 
         public IResult SendConfirmedEmail(User user)
         {
-            if(user.MailConfirm == true)
+            if (user.MailConfirm == true)
             {
                 return new ErrorResult(Messages.MailAlreadyConfirm);
             }
 
             DateTime confirmMailDate = user.MailConfirmDate;
             DateTime now = DateTime.Now;
-            if(confirmMailDate.ToShortDateString() == now.ToShortDateString())
+            if (confirmMailDate.ToShortDateString() == now.ToShortDateString())
             {
-                if(confirmMailDate.Hour == now.Hour && confirmMailDate.AddMinutes(5).Minute <= now.Minute)
+                if (confirmMailDate.Hour == now.Hour && confirmMailDate.AddMinutes(5).Minute <= now.Minute)
                 {
                     SendConfirmEmail(user);
                     return new SuccessResult(Messages.SendConfirmEmailSuccess);
