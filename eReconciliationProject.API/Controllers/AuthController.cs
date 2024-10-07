@@ -1,11 +1,8 @@
 ﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Business.Concrete;
 using eReconciliationProject.Core.Utilities.Hashing;
-using eReconciliationProject.Core.Utilities.Results.Concrete;
-using eReconciliationProject.Entities.Concrete;
 using eReconciliationProject.Entities.Dtos;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace eReconciliationProject.API.Controllers
 {
@@ -16,8 +13,11 @@ namespace eReconciliationProject.API.Controllers
         private readonly IAuthService _authService;
         private readonly IUserForgotPasswordService _userForgotPasswordService;
 
-        public AuthController(IAuthService authService, IUserForgotPasswordService userForgotPasswordService)
+        private readonly AuthManager _authManager;
+
+        public AuthController(IAuthService authService, IUserForgotPasswordService userForgotPasswordService, AuthManager authManager)
         {
+            _authManager = authManager;
             _authService = authService;
             _userForgotPasswordService = userForgotPasswordService;
         }
@@ -51,15 +51,21 @@ namespace eReconciliationProject.API.Controllers
         [HttpPost("registerSecondAccount")]
         public IActionResult RegisterSecondAccount(UserForRegisterToSecondAccountDto userForRegisterToSecond)
         {
-            var userExists = _authService.UserExists(userForRegisterToSecond.Email);
+            //var userExists = _authService.UserExists(userForRegisterToSecond.Email);
+            var userExists = _authManager.UserExists(userForRegisterToSecond.Email);
             if (!userExists.Success)
             {
                 return BadRequest(userExists.Message);
 
             }
 
-            var registerResult = _authService.RegisterSecondAccount(userForRegisterToSecond, userForRegisterToSecond.Password, userForRegisterToSecond.CompanyId);
-            var result = _authService.CreateAccessToken(registerResult.Data, userForRegisterToSecond.CompanyId);
+            //var registerResult = _authService.RegisterSecondAccount(userForRegisterToSecond, userForRegisterToSecond.Password, userForRegisterToSecond.CompanyId);
+
+            var registerResult = _authManager.RegisterSecondAccount(userForRegisterToSecond, userForRegisterToSecond.Password, userForRegisterToSecond.CompanyId);
+
+            //var result = _authService.CreateAccessToken(registerResult.Data, userForRegisterToSecond.CompanyId);
+
+            var result = _authManager.CreateAccessToken(registerResult.Data, userForRegisterToSecond.CompanyId);
             if (result.Success)
             {
                 return Ok(result);
@@ -197,17 +203,17 @@ namespace eReconciliationProject.API.Controllers
             _userForgotPasswordService.Update(forgotPasswordResult);
 
             var userResult = _authService.GetById(forgotPasswordResult.UserId).Data;
-            
-                byte[] passwordHash, passwordSalt;
-                HashingHelper.CreatePasswordHash(passwordDto.Password, out passwordHash, out passwordSalt);
-                userResult.PasswordHash = passwordHash;
-                userResult.PasswordSalt = passwordSalt;
-                var result = _authService.Update(userResult);
-                if (result.Success)
-                {
-                    return Ok(result);
-                }
-               
+
+            byte[] passwordHash, passwordSalt;
+            HashingHelper.CreatePasswordHash(passwordDto.Password, out passwordHash, out passwordSalt);
+            userResult.PasswordHash = passwordHash;
+            userResult.PasswordSalt = passwordSalt;
+            var result = _authService.Update(userResult);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
             return BadRequest(result.Message);
         }
     }

@@ -119,7 +119,6 @@ namespace eReconciliationProject.Business.Concrete
             var result = context.CurrencyAccounts.Where(x => x.Id == currencyAccount.Id && x.IsActive == true).FirstOrDefault();
             if (result != null)
             {
-
                 result.Code = currencyAccount.Code;
                 result.Name = currencyAccount.Name;
                 result.IdentityNumber = currencyAccount.IdentityNumber;

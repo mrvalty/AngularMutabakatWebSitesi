@@ -1,13 +1,9 @@
-﻿using eReconciliationProject.Entities.Concrete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using eReconciliationProject.Core.Entities;
+using eReconciliationProject.Entities.Concrete;
 
 namespace eReconciliationProject.Entities.Dtos
 {
-    public class CompanyDto
+    public class CompanyDto : IDto
     {
         public Company Company { get; set; }
         public int UserId { get; set; }

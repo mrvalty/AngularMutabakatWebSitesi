@@ -187,8 +187,33 @@ namespace eReconciliationProject.Business.Concrete
                 PasswordSalt = passwordSalt,
                 Name = userForRegister.Name,
             };
-            _userService.Add(user);
+            context.Users.Add(user);
+            context.SaveChanges();
+            //_userService.Add(user);
+
             _companyService.UserCompanyAdd(user.Id, companyId);
+
+
+            var operationClaims = _operationClaimService.GetList().Data;
+
+            foreach (var operationClaim in operationClaims)
+            {
+                if (operationClaim.Id != 1 && operationClaim.Id != 47 && operationClaim.Id != 48 && !operationClaim.Name.Contains("UserOperationClaim"))
+                {
+                    UserOperationClaim userOperationClaim = new UserOperationClaim()
+                    {
+                        CompanyId = companyId,
+                        AddedAt = DateTime.Now,
+                        OperationClaimId = operationClaim.Id,
+                        IsActive = true,
+                        UserId = user.Id
+                    };
+                    context.UserOperationClaims.Add(userOperationClaim);
+                    context.SaveChanges();
+
+                }
+            }
+
 
             SendConfirmEmail(user);
 

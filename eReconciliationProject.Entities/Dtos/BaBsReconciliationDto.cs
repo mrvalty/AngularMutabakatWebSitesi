@@ -1,13 +1,9 @@
-﻿using eReconciliationProject.Entities.Concrete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using eReconciliationProject.Core.Entities;
+using eReconciliationProject.Entities.Concrete;
 
 namespace eReconciliationProject.Entities.Dtos
 {
-    public class BaBsReconciliationDto : BaBsReconciliation
+    public class BaBsReconciliationDto : BaBsReconciliation, IDto
     {
         public string CompanyName { get; set; }
         public string CompanyTaxDepartment { get; set; }

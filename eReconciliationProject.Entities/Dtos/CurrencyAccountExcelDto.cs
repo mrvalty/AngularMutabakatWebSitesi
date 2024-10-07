@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using eReconciliationProject.Core.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace eReconciliationProject.Entities.Dtos
 {
-    public class CurrencyAccountExcelDto
+    public class CurrencyAccountExcelDto : IDto
     {
         public IFormFile File { get; set; }
 

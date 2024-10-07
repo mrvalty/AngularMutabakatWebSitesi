@@ -13,6 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<CurrencyAccountManager>();
+builder.Services.AddScoped<UserManager>();
+builder.Services.AddScoped<AuthManager>();
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
