@@ -60,4 +60,42 @@ public class UsersController : ControllerBase
         return BadRequest(result.Message);
     }
 
+    [HttpGet("changeStatus")]
+    public IActionResult ChangeStatus(int id)
+    {
+        var findUser = _userManager.GetById(id);
+        if (findUser.IsActive)
+        {
+            findUser.IsActive = false;
+        }
+        var result = _authManager.Update(findUser);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result.Message);
+    }
+
+    [HttpGet("getOperationClaimUser")]
+    public IActionResult GetListUserDto(string value, int companyId)
+    {
+        var result = _userManager.GetOperationClaimForUserList(value, companyId);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result.Message);
+    }
+
+    [HttpPost("updateOperationClaim")]
+    public IActionResult UpdateOperationClaim(OperationClaimForUserListDto operationClaim)
+    {
+        var result = _userManager.UpdateOperationClaim(operationClaim);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result.Message);
+    }
+
 }

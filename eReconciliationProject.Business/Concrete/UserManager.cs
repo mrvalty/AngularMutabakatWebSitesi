@@ -19,7 +19,7 @@ namespace eReconciliationProject.Business.Concrete
         //private IUserRepository _userRepository;
 
         ProjectContext context = new();
-
+        private readonly UserOperationClaimManager _userOperation;
         //public UserManager(IUserRepository userRepository)
         //{
         //    _userRepository = userRepository;
@@ -100,6 +100,7 @@ namespace eReconciliationProject.Business.Concrete
         {
             var result = (from userCompany in context.UserCompanies.Where(x => x.CompanyId == companyId && x.IsActive == true)
                           join user in context.Users on userCompany.UserId equals user.Id
+                          where user.IsActive == true
                           select new UserCompanyForListDto
                           {
                               Id = userCompany.Id,
@@ -108,7 +109,8 @@ namespace eReconciliationProject.Business.Concrete
                               Email = user.Email,
                               Name = user.Name,
                               UserAddedAt = user.AddedAt,
-                              UserIsActive = user.IsActive
+                              UserIsActive = user.IsActive,
+                              UserMailValue = user.MailConfirmValue
                           }).OrderBy(x => x.Name).ToList();
 
             return new SuccessDataResult<List<UserCompanyForListDto>>(result);
@@ -144,6 +146,52 @@ namespace eReconciliationProject.Business.Concrete
             context.SaveChanges();
 
             return new SuccessResult(Messages.UpdateUser);
+        }
+
+        public IDataResult<List<OperationClaimForUserListDto>> GetOperationClaimForUserList(string value, int companyId)
+        {
+            var user = context.Users.Where(p => p.MailConfirmValue == value).FirstOrDefault();
+
+            var result = (from operationClaim in context.OperationClaims
+                          where operationClaim.Name != "Admin" && !operationClaim.Name.Contains("UserOperationClaim")
+                          select new OperationClaimForUserListDto
+                          {
+                              Id = operationClaim.Id,
+                              Name = operationClaim.Name,
+                              Description = operationClaim.Description,
+                              Status = (context.UserOperationClaims.Where(p => p.UserId == user.Id && p.OperationClaimId == operationClaim.Id && p.CompanyId == companyId).Count() > 0 ? true : false),
+                              UserName = user.Name,
+                              UserId = user.Id,
+                              CompanyId = companyId
+                          }).OrderBy(x => x.Name).ToList();
+
+            return new SuccessDataResult<List<OperationClaimForUserListDto>>(result);
+        }
+
+        public IResult UpdateOperationClaim(OperationClaimForUserListDto operationClaim)
+        {
+            if (operationClaim.Status == true)
+            {
+                var query = context.UserOperationClaims.Where(x => x.UserId == operationClaim.UserId && x.CompanyId == operationClaim.CompanyId).ToList().FirstOrDefault(x => x.OperationClaimId == operationClaim.Id);
+                //var result = _userOperation.GetList(operationClaim.UserId, operationClaim.CompanyId).Data.Where(p => p.OperationClaimId == operationClaim.Id).FirstOrDefault();
+                context.UserOperationClaims.Remove(query);
+                context.SaveChanges();
+            }
+            else
+            {
+                UserOperationClaim userOperationClaim = new UserOperationClaim()
+                {
+                    CompanyId = operationClaim.CompanyId,
+                    AddedAt = DateTime.Now,
+                    IsActive = true,
+                    OperationClaimId = operationClaim.Id,
+                    UserId = operationClaim.UserId
+                };
+                context.UserOperationClaims.Add(userOperationClaim);
+                context.SaveChanges();
+            }
+
+            return new SuccessResult(Messages.UpdatedUserOperationClaim);
         }
     }
 }

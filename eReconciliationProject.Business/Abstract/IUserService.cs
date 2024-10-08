@@ -15,6 +15,8 @@ namespace eReconciliationProject.Business.Abstract
         User GetByMailConfirmValue(string value);
         IDataResult<List<UserCompanyForListDto>> GetListUserDto(int companyId);
         IDataResult<User> Get(int id);
+        IDataResult<List<OperationClaimForUserListDto>> GetOperationClaimForUserList(string value, int companyId);
+        IResult UpdateOperationClaim(OperationClaimForUserListDto operationClaim);
 
     }
 }

@@ -10,4 +10,5 @@ public class UserOperationClaimDto : IDto
     public string OperationClaimDescription { get; set; }
     public string OperationClaimName { get; set; }
 
+
 }
