@@ -1,4 +1,5 @@
-﻿using eReconciliationProject.Business.Concrete;
+﻿using eReconciliationProject.Business.Abstract;
+using eReconciliationProject.Business.Concrete;
 using eReconciliationProject.Entities.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,20 +8,67 @@ namespace eReconciliationProject.API.Controllers;
 [ApiController]
 public class UsersController : ControllerBase
 {
-    //private readonly IUserService _userService;
+    private readonly IUserService _userService;
     private readonly UserManager _userManager;
     private readonly AuthManager _authManager;
+    private readonly UserRelationshipManager _userRelationshipManager;
 
-    public UsersController(UserManager userManager, AuthManager authManager)
+    public UsersController(UserManager userManager, AuthManager authManager, UserRelationshipManager userRelationshipManager, IUserService userService)
     {
         _userManager = userManager;
         _authManager = authManager;
+        _userRelationshipManager = userRelationshipManager;
+        _userService = userService;
     }
 
     [HttpGet("getUserList")]
     public IActionResult GetUserList(int companyId)
     {
         var result = _userManager.GetListUserDto(companyId);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result.Message);
+    }
+
+    [HttpGet("getAdminUserList")]
+    public IActionResult GetAdminUsersList(int adminUserId)
+    {
+        var result = _userRelationshipManager.GetListDto(adminUserId);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result.Message);
+    }
+
+    [HttpGet("getAdminCompaniesForUser")]
+    public IActionResult GetAdminCompaniesForUser(int adminUserId, int userUserId)
+    {
+        var result = _userService.GetAdminCompaniesForUser(adminUserId, userUserId);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result.Message);
+    }
+
+    [HttpGet("getUserCompanyList")]
+    public IActionResult GetUsersCompanyList(int userId)
+    {
+        var result = _userRelationshipManager.GetById(userId);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result.Message);
+    }
+
+    [HttpGet("deleteUserCompanyId")]
+    public IActionResult UserCompanyDelete(int userId, int companyId)
+    {
+        var result = _userService.UserCompanyDelete(userId, companyId);
         if (result.Success)
         {
             return Ok(result);
@@ -77,7 +125,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("getOperationClaimUser")]
-    public IActionResult GetListUserDto(string value, int companyId)
+    public IActionResult GetListForUserDto(string value, int companyId)
     {
         var result = _userManager.GetOperationClaimForUserList(value, companyId);
         if (result.Success)

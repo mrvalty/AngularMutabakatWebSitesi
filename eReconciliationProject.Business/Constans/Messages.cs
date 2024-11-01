@@ -6,6 +6,7 @@
         public static string UpdateCompany = "Şirket kaydı işlemi başarıyla güncellendi.";
         public static string UserNotFound = "Kullanıcı bulunamadı.";
         public static string UpdateUser = "Kullanıcı bilgileri başarıyla güncellendi.";
+        public static string DeletedUserCompanyRelationship = "Kullanıcının şirket ile bağlantısı pasife başarıyla yapıldı.";
 
         public static string PasswordError = "Şifra hatalı.";
         public static string SuccessfulLogin = "Giriş işlemi başarılı.";

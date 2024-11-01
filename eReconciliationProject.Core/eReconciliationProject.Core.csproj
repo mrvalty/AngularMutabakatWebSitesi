@@ -15,10 +15,4 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="eReconciliationProject.DA">
-      <HintPath>..\eReconciliationProject.DA\bin\Debug\net6.0\eReconciliationProject.DA.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

@@ -26,7 +26,6 @@ namespace eReconciliationProject.DA.Repositories.Concrete
             throw new NotImplementedException();
         }
 
-
         public List<UserCompanyForListDto> GetUserListDto(int companyId)
         {
             using (var context = new ProjectContext())
@@ -47,27 +46,51 @@ namespace eReconciliationProject.DA.Repositories.Concrete
             }
         }
 
-        //public List<UserOperationClaimDto> GetOperationClaimForUserList(string value, int companyId)
-        //{
-        //    using (var context = new ProjectContext())
-        //    {
-        //        var user = context.Users.Where(p => p.MailConfirmValue == value).FirstOrDefault();
+        public List<OperationClaimForUserListDto> GetOperationClaimForUserList(string value, int companyId)
+        {
+            using (var context = new ProjectContext())
+            {
+                var user = context.Users.Where(p => p.MailConfirmValue == value).FirstOrDefault();
 
-        //        var result = from operationClaim in context.OperationClaims
-        //                     where operationClaim.Name != "Admin" && !operationClaim.Name.Contains("UserOperationClaim")
-        //                     select new UserOperationClaimDto
-        //                     {
-        //                         Id = operationClaim.Id,
-        //                         Name = operationClaim.Name,
-        //                         Description = operationClaim.Description,
-        //                         Status = (context.UserOperationClaims.Where(p => p.UserId == user.Id && p.OperationClaimId == operationClaim.Id && p.CompanyId == companyId).Count() > 0 ? true : false),
-        //                         UserName = user.Name,
-        //                         UserId = user.Id,
-        //                         CompanyId = companyId
-        //                     };
-        //        return result.OrderBy(p => p.Name).ToList();
-        //    }
-        //}
+                var result = (from operationClaim in context.OperationClaims
+                              where operationClaim.Name != "Admin" && !operationClaim.Name.Contains("UserOperationClaim")
+                              select new OperationClaimForUserListDto
+                              {
+                                  Id = operationClaim.Id,
+                                  Name = operationClaim.Name,
+                                  Description = operationClaim.Description,
+                                  Status = (context.UserOperationClaims.Where(p => p.UserId == user.Id && p.OperationClaimId == operationClaim.Id && p.CompanyId == companyId).Count() > 0 ? true : false),
+                                  UserName = user.Name,
+                                  UserId = user.Id,
+                                  CompanyId = companyId
+                              }).OrderBy(x => x.Name).ToList();
+                return result;
+            }
+        }
 
+        public List<AdminCompaniesForUserDto> GetAdminCompaniesForUser(int adminUserId, int userUserId)
+        {
+
+            using (var context = new ProjectContext())
+            {
+                var result = (from userCompany in context.UserCompanies.Where(x => x.UserId == adminUserId)
+                              join company in context.Companies on userCompany.CompanyId equals company.Id
+                              select new AdminCompaniesForUserDto
+                              {
+                                  Id = company.Id,
+                                  Name = company.Name,
+                                  AddedAt = company.AddedAt,
+                                  Address = company.Address,
+                                  IdentityNumber = company.IdentityNumber,
+                                  IsActive = company.IsActive,
+                                  TaxDepartment = company.TaxDepartment,
+                                  TaxIdNumber = company.TaxIdNumber,
+                                  IsThere = (context.UserCompanies.Any(x => x.UserId == userUserId && x.CompanyId == company.Id))
+                              }).OrderBy(x => x.Name).ToList();
+                return result;
+            }
+
+            throw new NotImplementedException();
+        }
     }
 }

@@ -18,5 +18,8 @@ namespace eReconciliationProject.Business.Abstract
         IDataResult<List<OperationClaimForUserListDto>> GetOperationClaimForUserList(string value, int companyId);
         IResult UpdateOperationClaim(OperationClaimForUserListDto operationClaim);
 
+        IResult UserCompanyDelete(int userId, int companyId);
+        IDataResult<List<AdminCompaniesForUserDto>> GetAdminCompaniesForUser(int userId, int companyId);
+
     }
 }

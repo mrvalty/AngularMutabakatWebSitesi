@@ -1,11 +1,6 @@
 ﻿using eReconciliationProject.Core.Concrete;
 using eReconciliationProject.Entities.Concrete;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.DA.Context
 {
@@ -32,7 +27,8 @@ namespace eReconciliationProject.DA.Context
         public DbSet<UserOperationClaim> UserOperationClaims { get; set; }
         public DbSet<MailTemplate> MailTemplates { get; set; }
         public DbSet<TermsandCondition> TermsandConditions { get; set; }
-        public DbSet<UserForgotPassword>  UserForgotPasswords { get; set; }
+        public DbSet<UserForgotPassword> UserForgotPasswords { get; set; }
+        public DbSet<UserRelationship> UserRelationships { get; set; }
 
     }
 }

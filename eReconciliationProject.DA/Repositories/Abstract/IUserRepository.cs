@@ -8,6 +8,8 @@ namespace eReconciliationProject.DA.Repositories.Abstract
     {
         List<OperationClaim> GetClaims(User user, int companyId);
         List<UserCompanyForListDto> GetUserListDto(int companyId);
-        //List<UserOperationClaimDto> GetOperationClaimForUserList(string value, int companyId);
+        List<OperationClaimForUserListDto> GetOperationClaimForUserList(string value, int companyId);
+
+        List<AdminCompaniesForUserDto> GetAdminCompaniesForUser(int adminUserId, int userUserId);
     }
 }

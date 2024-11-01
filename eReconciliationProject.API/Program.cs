@@ -1,4 +1,3 @@
-using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using eReconciliationProject.Business.Autofac;
 using eReconciliationProject.Business.Concrete;
@@ -15,10 +14,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<CurrencyAccountManager>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<AuthManager>();
+builder.Services.AddScoped<UserRelationshipManager>();
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
-builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule(new AutofacBusinessModule()));
+builder.Services.AddApplicationServices();
+
+//builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule(new AutofacBusinessModule()));
 
 IConfiguration configuration = builder.Configuration;
 
