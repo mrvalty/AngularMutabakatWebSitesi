@@ -19,11 +19,11 @@ namespace eReconciliationProject.API.Controllers
         public IActionResult GetCompanyList()
         {
             var result = _companyService.GetList();
-            if(result.Success)
+            if (result.Success)
             {
                 return Ok(result);
             }
-            return BadRequest(result.Message) ;
+            return BadRequest(result.Message);
         }
 
         [HttpGet("getcompany")]
@@ -51,6 +51,37 @@ namespace eReconciliationProject.API.Controllers
         [HttpPost("updateCompany")]
         public IActionResult UpdateCompanyAndUserCompany(Company company)
         {
+            var result = _companyService.Update(company);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
+        }
+
+        [HttpGet("getCompanyListByUserid")]
+        public IActionResult GetCompanyListByUserId(int userId)
+        {
+            var result = _companyService.GetListByUserId(userId);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
+        }
+
+        [HttpPost("changeStatusCompany")]
+        public IActionResult ChangeStatusCompany(Company company)
+        {
+            if (company.IsActive)
+            {
+                company.IsActive = false;
+            }
+            else
+            {
+                company.IsActive = true;
+            }
+
             var result = _companyService.Update(company);
             if (result.Success)
             {

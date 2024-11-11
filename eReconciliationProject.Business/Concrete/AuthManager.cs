@@ -21,10 +21,11 @@ namespace eReconciliationProject.Business.Concrete
         private readonly IMailParameterService _mailParameterService;
         private readonly IMailTemplateService _mailTemplateService;
         private readonly IOperationClaimService _operationClaimService;
+        private readonly IUserRelationshipService _userRelationshipService;
         ProjectContext context = new();
 
 
-        public AuthManager(IUserService userService, ITokenHelper tokenHelper, ICompanyService companyService, IMailService mailService, IMailParameterService mailParameterService, IMailTemplateService mailTemplateService, IOperationClaimService operationClaimService)
+        public AuthManager(IUserService userService, ITokenHelper tokenHelper, ICompanyService companyService, IMailService mailService, IMailParameterService mailParameterService, IMailTemplateService mailTemplateService, IOperationClaimService operationClaimService, IUserRelationshipService userRelationshipService)
         {
             _userService = userService;
             _tokenHelper = tokenHelper;
@@ -33,6 +34,7 @@ namespace eReconciliationProject.Business.Concrete
             _mailParameterService = mailParameterService;
             _mailTemplateService = mailTemplateService;
             _operationClaimService = operationClaimService;
+            _userRelationshipService = userRelationshipService;
         }
 
         public IResult CompanyExists(Company company)
@@ -171,6 +173,8 @@ namespace eReconciliationProject.Business.Concrete
             user.MailConfirmDate = DateTime.Now;
             _userService.Update(user);
         }
+
+        [TransactionScopeAspect]
         public IDataResult<User> RegisterSecondAccount(UserForRegister userForRegister, string password, int companyId)
         {
             byte[] passwordHash, passwordSalt;

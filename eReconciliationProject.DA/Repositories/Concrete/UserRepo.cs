@@ -70,7 +70,6 @@ namespace eReconciliationProject.DA.Repositories.Concrete
 
         public List<AdminCompaniesForUserDto> GetAdminCompaniesForUser(int adminUserId, int userUserId)
         {
-
             using (var context = new ProjectContext())
             {
                 var result = (from userCompany in context.UserCompanies.Where(x => x.UserId == adminUserId)
@@ -85,12 +84,11 @@ namespace eReconciliationProject.DA.Repositories.Concrete
                                   IsActive = company.IsActive,
                                   TaxDepartment = company.TaxDepartment,
                                   TaxIdNumber = company.TaxIdNumber,
-                                  IsThere = (context.UserCompanies.Any(x => x.UserId == userUserId && x.CompanyId == company.Id))
+                                  IsThere = (context.UserCompanies.Where(p => p.UserId == userUserId && p.CompanyId == company.Id).Count() > 0 ? true : false)
                               }).OrderBy(x => x.Name).ToList();
                 return result;
             }
 
-            throw new NotImplementedException();
         }
     }
 }

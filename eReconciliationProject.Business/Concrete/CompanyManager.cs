@@ -12,12 +12,6 @@ using eReconciliationProject.Core.Utilities.Results.Concrete;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
 using eReconciliationProject.Entities.Dtos;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.Business.Concrete
 {
@@ -39,8 +33,8 @@ namespace eReconciliationProject.Business.Concrete
         [ValidationAspect(typeof(CompanyValidator))]
         public IResult Add(Company company)
         {
-                _companyRepository.Add(company);
-                return new SuccessResult(Messages.AddedCompany);
+            _companyRepository.Add(company);
+            return new SuccessResult(Messages.AddedCompany);
         }
 
         [CacheRemoveAspect("ICompanyService.Get")]
@@ -96,6 +90,12 @@ namespace eReconciliationProject.Business.Concrete
         {
             _companyRepository.UserCompanyAdd(userId, companyId);
             return new SuccessResult();
+        }
+
+        public IDataResult<List<Company>> GetListByUserId(int userId)
+        {
+            _companyRepository.GetListByUserId(userId);
+            return new SuccessDataResult<List<Company>>(_companyRepository.GetListByUserId(userId));
         }
     }
 }

@@ -3,12 +3,6 @@ using eReconciliationProject.Core.DataAccess.EntityFramework;
 using eReconciliationProject.DA.Context;
 using eReconciliationProject.DA.Repositories.Abstract;
 using eReconciliationProject.Entities.Concrete;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eReconciliationProject.DA.Repositories.Concrete
 {
@@ -37,6 +31,28 @@ namespace eReconciliationProject.DA.Repositories.Concrete
 
                 context.UserCompanies.Add(userCompany);
                 context.SaveChanges();
+            }
+        }
+
+        public List<Company> GetListByUserId(int userId)
+        {
+            using (var context = new ProjectContext())
+            {
+                var result = (from userCompany in context.UserCompanies.Where(x => x.UserId == userId)
+                              join company in context.Companies on userCompany.CompanyId equals company.Id
+                              select new Company()
+                              {
+                                  Id = company.Id,
+                                  AddedAt = company.AddedAt,
+                                  Address = company.Address,
+                                  IdentityNumber = company.IdentityNumber,
+                                  IsActive = company.IsActive,
+                                  Name = company.Name,
+                                  TaxDepartment = company.TaxDepartment,
+                                  TaxIdNumber = company.TaxIdNumber
+                              }).OrderBy(x => x.Name).ToList();
+
+                return result;
             }
         }
     }
