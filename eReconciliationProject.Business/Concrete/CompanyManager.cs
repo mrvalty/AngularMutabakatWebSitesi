@@ -18,11 +18,16 @@ namespace eReconciliationProject.Business.Concrete
     public class CompanyManager : ICompanyService
     {
         private readonly ICompanyRepository _companyRepository;
+        private readonly IOperationClaimService _operationClaimService;
+        private readonly IUserOperationClaimService _userOperationClaimService;
 
-        public CompanyManager(ICompanyRepository companyRepository)
+        public CompanyManager(ICompanyRepository companyRepository, IOperationClaimService operationClaimService, IUserOperationClaimService userOperationClaimService)
         {
             _companyRepository = companyRepository;
+            _operationClaimService = operationClaimService;
+            _userOperationClaimService = userOperationClaimService;
         }
+
         //Dependency Injection
         //Kullanıcı Yetkisi
         //Transaction
@@ -42,8 +47,41 @@ namespace eReconciliationProject.Business.Concrete
         [TransactionScopeAspect]
         public IResult AddCompanyAndUserCompany(CompanyDto companyDto)
         {
-            _companyRepository.Add(companyDto.Company);
-            _companyRepository.UserCompanyAdd(companyDto.UserId, companyDto.Company.Id);
+            Company company = new Company()
+            {
+                Id = companyDto.Id,
+                Name = companyDto.Name,
+                TaxDepartment = companyDto.TaxDepartment,
+                TaxIdNumber = companyDto.TaxIdNumber,
+                IdentityNumber = companyDto.IdentityNumber,
+                Address = companyDto.Address,
+                AddedAt = companyDto.AddedAt,
+                IsActive = companyDto.IsActive
+            };
+
+            _companyRepository.Add(company);
+            _companyRepository.UserCompanyAdd(companyDto.UserId, company.Id);
+
+            var operationClaims = _operationClaimService.GetList().Data;
+
+            foreach (var operationClaim in operationClaims)
+            {
+                if (operationClaim.Id != 1 && operationClaim.Id != 47 && operationClaim.Id != 48 && !operationClaim.Name.Contains("UserOperationClaim"))
+                {
+                    UserOperationClaim userOperationClaim = new UserOperationClaim()
+                    {
+                        CompanyId = company.Id,
+                        AddedAt = DateTime.Now,
+                        OperationClaimId = operationClaim.Id,
+                        IsActive = true,
+                        UserId = companyDto.UserId,
+                    };
+                    _userOperationClaimService.Add(userOperationClaim);
+
+                }
+            }
+
+
             return new SuccessResult(Messages.AddedCompany);
 
         }

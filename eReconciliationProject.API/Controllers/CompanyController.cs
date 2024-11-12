@@ -27,9 +27,9 @@ namespace eReconciliationProject.API.Controllers
         }
 
         [HttpGet("getcompany")]
-        public IActionResult GetById(int id)
+        public IActionResult GetById(int companyId)
         {
-            var result = _companyService.GetById(id);
+            var result = _companyService.GetById(companyId);
             if (result.Success)
             {
                 return Ok(result);
@@ -39,6 +39,17 @@ namespace eReconciliationProject.API.Controllers
 
         [HttpPost("addCompanyAndUserCompany")]
         public IActionResult AddCompanyAndUserCompany(CompanyDto companyDto)
+        {
+            var result = _companyService.AddCompanyAndUserCompany(companyDto);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
+        }
+
+        [HttpPost("addCompany")]
+        public IActionResult AddCompany(CompanyDto companyDto)
         {
             var result = _companyService.AddCompanyAndUserCompany(companyDto);
             if (result.Success)
